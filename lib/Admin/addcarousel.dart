@@ -1,6 +1,6 @@
-
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -150,16 +150,35 @@ class _AdminImageUploadPageState extends State<AdminImageUploadPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin: Update Carousel Images'),
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: Icon(Icons.arrow_back),
+          color: Colors.white,
+        ),
+        backgroundColor: Colors.green,
+        title: Text(
+          'Admin: Update Carousel Images',
+          style: GoogleFonts.oswald(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
+            Text(
               'Select or Update 4 Images for Carousel',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: GoogleFonts.oswald(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -206,6 +225,7 @@ class _AdminImageUploadPageState extends State<AdminImageUploadPage> {
               ),
             const SizedBox(height: 16),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
               onPressed: isUploading ||
                       (images.every((img) => img == null) &&
                           imageUrls.any((url) => url == null))
@@ -213,7 +233,14 @@ class _AdminImageUploadPageState extends State<AdminImageUploadPage> {
                   : _uploadImagesAndSaveUrls,
               child: isUploading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Update Images'),
+                  : Text(
+                      'Update Images',
+                      style: GoogleFonts.oswald(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
             ),
           ],
         ),

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class UserListPage extends StatelessWidget {
   const UserListPage({super.key});
@@ -19,9 +20,21 @@ class UserListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('All Users'),
+        centerTitle: true,
+        backgroundColor: Colors.green,
+        title: Text(
+          'All Users',
+          style: GoogleFonts.oswald(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),

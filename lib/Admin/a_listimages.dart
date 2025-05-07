@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ListImagesPage extends StatefulWidget {
   const ListImagesPage({Key? key}) : super(key: key);
@@ -150,94 +151,116 @@ class _ListImagesPageState extends State<ListImagesPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Image Gallery'),
+        backgroundColor: Colors.green,
+        title: Text(
+          'Image Gallery',
+          style: GoogleFonts.oswald(
+            fontSize: 25,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
         centerTitle: true,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: Colors.white,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
+            color: Colors.white,
             onPressed: _loadGalleryImages,
             tooltip: 'Refresh Gallery',
           ),
         ],
       ),
-      body: _isDeleting
-          ? const Center(child: CircularProgressIndicator())
-          : _galleryImages.isEmpty
-              ? const Center(child: Text('No images in gallery.'))
-              : GridView.builder(
-                  padding: const EdgeInsets.all(16.0),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
-                    childAspectRatio: 1,
+      body: Container(
+        color: Colors.white,
+        child: _isDeleting
+            ? const Center(child: CircularProgressIndicator())
+            : _galleryImages.isEmpty
+                ? const Center(child: Text('No images in gallery.'))
+                : GridView.builder(
+                    padding: const EdgeInsets.all(16.0),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      childAspectRatio: 1,
+                    ),
+                    itemCount: _galleryImages.length,
+                    itemBuilder: (context, index) {
+                      final image = _galleryImages[index];
+                      final optimizedUrl =
+                          _optimizeCloudinaryUrl(image['url']!);
+                      return Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: CachedNetworkImage(
+                              imageUrl: optimizedUrl,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => const Center(
+                                  child: CircularProgressIndicator()),
+                              errorWidget: (context, url, error) {
+                                print('Error loading image $url: $error');
+                                return Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: const [
+                                      Icon(Icons.error, color: Colors.red),
+                                      Text('Loading...',
+                                          style: TextStyle(color: Colors.grey)),
+                                    ],
+                                  ),
+                                );
+                              },
+                              fadeInDuration: const Duration(milliseconds: 200),
+                            ),
+                          ),
+                          Positioned(
+                            top: 0,
+                            right: 0,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: IconButton(
+                                icon: const Icon(Icons.delete,
+                                    color: Colors.white, size: 20),
+                                padding: const EdgeInsets.all(4),
+                                constraints: const BoxConstraints(),
+                                onPressed: () => _deleteImage(image['id']!),
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              color: Colors.black.withOpacity(0.6),
+                              padding: const EdgeInsets.symmetric(vertical: 4),
+                              child: Text(
+                                '${image['category']}: ${image['subcategory']}',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 10),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
-                  itemCount: _galleryImages.length,
-                  itemBuilder: (context, index) {
-                    final image = _galleryImages[index];
-                    final optimizedUrl = _optimizeCloudinaryUrl(image['url']!);
-                    return Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: CachedNetworkImage(
-                            imageUrl: optimizedUrl,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => const Center(
-                                child: CircularProgressIndicator()),
-                            errorWidget: (context, url, error) {
-                              print('Error loading image $url: $error');
-                              return Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: const [
-                                    Icon(Icons.error, color: Colors.red),
-                                    Text('Loading...',
-                                        style: TextStyle(color: Colors.grey)),
-                                  ],
-                                ),
-                              );
-                            },
-                            fadeInDuration: const Duration(milliseconds: 200),
-                          ),
-                        ),
-                        Positioned(
-                          top: 0,
-                          right: 0,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: IconButton(
-                              icon: const Icon(Icons.delete,
-                                  color: Colors.white, size: 20),
-                              padding: const EdgeInsets.all(4),
-                              constraints: const BoxConstraints(),
-                              onPressed: () => _deleteImage(image['id']!),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            color: Colors.black.withOpacity(0.6),
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: Text(
-                              '${image['category']}: ${image['subcategory']}',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 10),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
+      ),
     );
   }
 }

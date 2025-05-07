@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart'; // For date formatting
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:awesome_notifications/awesome_notifications.dart'; // For notifications
@@ -683,17 +684,40 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Manage Subscriptions')),
+        appBar: AppBar(
+          title: const Text('Manage Subscriptions'),
+          backgroundColor: Colors.green,
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Manage Subscriptions'),
+        centerTitle: true,
+        title: Text(
+          'Manage Subscriptions',
+          style: GoogleFonts.oswald(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.green,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(
+              Icons.refresh,
+              color: Colors.white,
+            ),
             onPressed: _loadCategories,
           ),
         ],

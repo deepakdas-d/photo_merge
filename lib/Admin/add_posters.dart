@@ -353,8 +353,8 @@ class _AddImagePageState extends State<AddImagePage> {
                           // }
                           return Container(
                             decoration: BoxDecoration(
-                              color:
-                                  Colors.white, // Set background color to white
+                              color: Colors.grey
+                                  .shade400, // Set background color to white
                               borderRadius: BorderRadius.circular(
                                   8), // Add rounded corners
                               boxShadow: [
@@ -400,7 +400,7 @@ class _AddImagePageState extends State<AddImagePage> {
                                     value: subcategory,
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color: Colors.grey.shade100,
+                                        color: Colors.grey.shade400,
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       padding: const EdgeInsets.symmetric(

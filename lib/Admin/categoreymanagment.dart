@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:photomerge/Admin/list_categories_and_subcategories.dart';
 
 class CategoryManagementPage extends StatefulWidget {
   const CategoryManagementPage({Key? key}) : super(key: key);
@@ -103,42 +104,42 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
     }
   }
 
-  Future<void> _deleteCategory(String docId) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Category'),
-        content: const Text(
-            'Are you sure you want to delete this category and its subcategories?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
+  // Future<void> _deleteCategory(String docId) async {
+  //   final confirmed = await showDialog<bool>(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       title: const Text('Delete Category'),
+  //       content: const Text(
+  //           'Are you sure you want to delete this category and its subcategories?'),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(context, false),
+  //           child: const Text('Cancel'),
+  //         ),
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(context, true),
+  //           child: const Text('Delete', style: TextStyle(color: Colors.red)),
+  //         ),
+  //       ],
+  //     ),
+  //   );
 
-    if (confirmed != true) return;
+  //   if (confirmed != true) return;
 
-    setState(() => _isLoading = true);
-    try {
-      await _firestore.collection('categories').doc(docId).delete();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Category deleted successfully')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error deleting category: $e')),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
+  //   setState(() => _isLoading = true);
+  //   try {
+  //     await _firestore.collection('categories').doc(docId).delete();
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Category deleted successfully')),
+  //     );
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Error deleting category: $e')),
+  //     );
+  //   } finally {
+  //     setState(() => _isLoading = false);
+  //   }
+  // }
 
   @override
   void dispose() {
@@ -176,6 +177,19 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
             Navigator.pop(context);
           },
         ),
+        actions: [
+          IconButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ListCategoriesAndSubcategories(),
+              ),
+            ),
+            icon:
+                const Icon(Icons.list), // You can change this icon as you like
+            tooltip: 'View Categories',
+          ),
+        ],
       ),
       body: Container(
         color: Colors.white,
@@ -243,7 +257,7 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
                           return const Text('No categories available');
                         }
                         // if (_selectedCategory == null ||
-                        //     !categories.contains(_selectedCategory)) {
+                        //     !categories.contains(_selectedCategory)) {this caused the loading.
                         //   _selectedCategory = categories.first;
                         // }
                         return DropdownButtonFormField<String>(
@@ -309,91 +323,91 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
                     ),
                     const SizedBox(height: 16),
                     // List Categories and Subcategories
-                    Text(
-                      'Categories and Subcategories',
-                      style: GoogleFonts.oswald(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    Expanded(
-                      child: StreamBuilder<QuerySnapshot>(
-                        stream: _firestore
-                            .collection('categories')
-                            .where('createdBy', isEqualTo: currentUser.uid)
-                            .snapshots(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Center(
-                                child: CircularProgressIndicator());
-                          }
-                          if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          }
-                          if (!snapshot.hasData ||
-                              snapshot.data!.docs.isEmpty) {
-                            return const Center(
-                                child: Text('No categories found'));
-                          }
-                          return Scrollbar(
-                            controller: _scrollController,
-                            thumbVisibility:
-                                true, // Show scrollbar when scrolling
-                            thickness: 6,
-                            radius: const Radius.circular(8),
-                            child: ListView.builder(
-                              controller: _scrollController,
-                              itemCount: snapshot.data!.docs.length,
-                              itemBuilder: (context, index) {
-                                final doc = snapshot.data!.docs[index];
-                                final categoryName = doc['name'] as String;
-                                final subcategories = List<String>.from(
-                                    doc['subcategories'] ?? []);
+                    // Text(
+                    //   'Categories and Subcategories',
+                    //   style: GoogleFonts.oswald(
+                    //     fontSize: 18,
+                    //     fontWeight: FontWeight.bold,
+                    //     color: Colors.black,
+                    //   ),
+                    // ),
+                    // Expanded(
+                    //   child: StreamBuilder<QuerySnapshot>(
+                    //     stream: _firestore
+                    //         .collection('categories')
+                    //         .where('createdBy', isEqualTo: currentUser.uid)
+                    //         .snapshots(),
+                    //     builder: (context, snapshot) {
+                    //       if (snapshot.connectionState ==
+                    //           ConnectionState.waiting) {
+                    //         return const Center(
+                    //             child: CircularProgressIndicator());
+                    //       }
+                    //       if (snapshot.hasError) {
+                    //         return Text('Error: ${snapshot.error}');
+                    //       }
+                    //       if (!snapshot.hasData ||
+                    //           snapshot.data!.docs.isEmpty) {
+                    //         return const Center(
+                    //             child: Text('No categories found'));
+                    //       }
+                    //       return Scrollbar(
+                    //         controller: _scrollController,
+                    //         thumbVisibility:
+                    //             true, // Show scrollbar when scrolling
+                    //         thickness: 6,
+                    //         radius: const Radius.circular(8),
+                    //         child: ListView.builder(
+                    //           controller: _scrollController,
+                    //           itemCount: snapshot.data!.docs.length,
+                    //           itemBuilder: (context, index) {
+                    //             final doc = snapshot.data!.docs[index];
+                    //             final categoryName = doc['name'] as String;
+                    //             final subcategories = List<String>.from(
+                    //                 doc['subcategories'] ?? []);
 
-                                return Card(
-                                  elevation: 4,
-                                  margin: const EdgeInsets.symmetric(
-                                      vertical: 8.0, horizontal: 16.0),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: ListTile(
-                                      title: Text(
-                                        categoryName,
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      subtitle: Text(
-                                        'Subcategories: ${subcategories.join(', ')}',
-                                        style: TextStyle(
-                                          color: Colors.grey[700],
-                                        ),
-                                      ),
-                                      trailing: IconButton(
-                                        icon: const Icon(Icons.delete,
-                                            color: Colors.red),
-                                        onPressed: () =>
-                                            _deleteCategory(doc.id),
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+                    //             return Card(
+                    //               elevation: 4,
+                    //               margin: const EdgeInsets.symmetric(
+                    //                   vertical: 8.0, horizontal: 16.0),
+                    //               shape: RoundedRectangleBorder(
+                    //                 borderRadius: BorderRadius.circular(12),
+                    //               ),
+                    //               child: Container(
+                    //                 decoration: BoxDecoration(
+                    //                   color: Colors.white,
+                    //                   borderRadius: BorderRadius.circular(12),
+                    //                 ),
+                    //                 padding: const EdgeInsets.all(12.0),
+                    //                 child: ListTile(
+                    //                   title: Text(
+                    //                     categoryName,
+                    //                     style: const TextStyle(
+                    //                       color: Colors.black,
+                    //                       fontWeight: FontWeight.bold,
+                    //                     ),
+                    //                   ),
+                    //                   subtitle: Text(
+                    //                     'Subcategories: ${subcategories.join(', ')}',
+                    //                     style: TextStyle(
+                    //                       color: Colors.grey[700],
+                    //                     ),
+                    //                   ),
+                    //                   trailing: IconButton(
+                    //                     icon: const Icon(Icons.delete,
+                    //                         color: Colors.red),
+                    //                     onPressed: () =>
+                    //                         _deleteCategory(doc.id),
+                    //                   ),
+                    //                 ),
+                    //               ),
+                    //             );
+                    //           },
+                    //         ),
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
