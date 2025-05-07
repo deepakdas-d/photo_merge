@@ -15,6 +15,7 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
   final _firestore = FirebaseFirestore.instance;
   final _categoryController = TextEditingController();
   final _subcategoryController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   String? _selectedCategory;
   bool _isLoading = false;
 
@@ -143,6 +144,7 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
   void dispose() {
     _categoryController.dispose();
     _subcategoryController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -166,6 +168,14 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
         ),
         backgroundColor: Colors.green,
         centerTitle: true,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          color: Colors.white,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: Container(
         color: Colors.white,
@@ -317,29 +327,59 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
                             return const Center(
                                 child: Text('No categories found'));
                           }
-                          return ListView.builder(
-                            itemCount: snapshot.data!.docs.length,
-                            itemBuilder: (context, index) {
-                              final doc = snapshot.data!.docs[index];
-                              final categoryName = doc['name'] as String;
-                              final subcategories =
-                                  List<String>.from(doc['subcategories'] ?? []);
-                              return Card(
-                                child: Container(
-                                  color: Colors.green[50],
-                                  child: ListTile(
-                                    title: Text(categoryName),
-                                    subtitle: Text(
-                                        'Subcategories: ${subcategories.join(', ')}'),
-                                    trailing: IconButton(
-                                      icon: const Icon(Icons.delete,
-                                          color: Colors.red),
-                                      onPressed: () => _deleteCategory(doc.id),
+                          return Scrollbar(
+                            controller: _scrollController,
+                            thumbVisibility:
+                                true, // Show scrollbar when scrolling
+                            thickness: 6,
+                            radius: const Radius.circular(8),
+                            child: ListView.builder(
+                              controller: _scrollController,
+                              itemCount: snapshot.data!.docs.length,
+                              itemBuilder: (context, index) {
+                                final doc = snapshot.data!.docs[index];
+                                final categoryName = doc['name'] as String;
+                                final subcategories = List<String>.from(
+                                    doc['subcategories'] ?? []);
+
+                                return Card(
+                                  elevation: 4,
+                                  margin: const EdgeInsets.symmetric(
+                                      vertical: 8.0, horizontal: 16.0),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: ListTile(
+                                      title: Text(
+                                        categoryName,
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        'Subcategories: ${subcategories.join(', ')}',
+                                        style: TextStyle(
+                                          color: Colors.grey[700],
+                                        ),
+                                      ),
+                                      trailing: IconButton(
+                                        icon: const Icon(Icons.delete,
+                                            color: Colors.red),
+                                        onPressed: () =>
+                                            _deleteCategory(doc.id),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           );
                         },
                       ),
