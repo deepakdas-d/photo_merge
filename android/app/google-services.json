@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "209905167867",
+    "project_id": "templatesapp-4dd54",
+    "storage_bucket": "templatesapp-4dd54.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:209905167867:android:19a88487a0d2d9460e6f5e",
+        "android_client_info": {
+          "package_name": "com.example.photomerge"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC37KTYAiNqZZvHdJxYcn0zLNxgpghpm_8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
