@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
@@ -20,7 +21,7 @@ class _AddImagePageState extends State<AddImagePage> {
   final _firestore = FirebaseFirestore.instance;
   List<File> _selectedImages = [];
   bool _isUploading = false;
-  String? _selectedCategory;
+  String? _selectedCategory = null;
   String? _selectedSubcategory;
 
   Future<void> _pickImages() async {
@@ -182,191 +183,352 @@ class _AddImagePageState extends State<AddImagePage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Add Images'),
+          backgroundColor: Colors.green,
+          title: Text(
+            'Add Images',
+            style: GoogleFonts.oswald(
+              color: Colors.white,
+              fontSize: 25,
+            ),
+          ),
           centerTitle: true,
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            color: Colors.white,
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
         ),
-        body: _isUploading
-            ? const Center(child: CircularProgressIndicator())
-            : Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Category Dropdown
-                    StreamBuilder<QuerySnapshot>(
-                      stream: _firestore
-                          .collection('categories')
-                          .where('createdBy', isEqualTo: currentUser.uid)
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        }
-                        if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        }
-                        final categories = snapshot.data?.docs
-                                .map((doc) => doc['name'] as String)
-                                .toList() ??
-                            [];
-                        if (categories.isEmpty) {
-                          return const Text(
-                              'No categories available. Please add categories first.');
-                        }
-                        if (_selectedCategory == null ||
-                            !categories.contains(_selectedCategory)) {
-                          _selectedCategory = categories.first;
-                        }
-                        return DropdownButton<String>(
-                          isExpanded: true,
-                          value: _selectedCategory,
-                          hint: const Text('Select Category'),
-                          items: categories
-                              .map((category) => DropdownMenuItem<String>(
-                                    value: category,
-                                    child: Text(category),
-                                  ))
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedCategory = value;
-                              _selectedSubcategory = null; // Reset subcategory
-                            });
-                          },
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    // Subcategory Dropdown
-                    StreamBuilder<DocumentSnapshot>(
-                      stream: _selectedCategory != null
-                          ? _firestore
+        body: Container(
+          padding: const EdgeInsets.only(top: 30.0),
+          color: Colors.white,
+          child: _isUploading
+              ? const Center(child: CircularProgressIndicator())
+              : Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Category Dropdown
+                      StreamBuilder<QuerySnapshot>(
+                          stream: _firestore
                               .collection('categories')
-                              .where('name', isEqualTo: _selectedCategory)
                               .where('createdBy', isEqualTo: currentUser.uid)
-                              .snapshots()
-                              .map((snapshot) => snapshot.docs.first)
-                          : null,
-                      builder: (context, snapshot) {
-                        if (_selectedCategory == null ||
-                            snapshot.connectionState ==
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
-                          return const SizedBox.shrink();
-                        }
-                        if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        }
-                        final subcategories = List<String>.from(
-                            snapshot.data?['subcategories'] ?? []);
-                        if (subcategories.isEmpty) {
-                          return const Text(
-                              'No subcategories available for this category.');
-                        }
-                        if (_selectedSubcategory == null ||
-                            !subcategories.contains(_selectedSubcategory)) {
-                          _selectedSubcategory = subcategories.first;
-                        }
-                        return DropdownButton<String>(
-                          isExpanded: true,
-                          value: _selectedSubcategory,
-                          hint: const Text('Select Subcategory'),
-                          items: subcategories
-                              .map((subcategory) => DropdownMenuItem<String>(
-                                    value: subcategory,
-                                    child: Text(subcategory),
-                                  ))
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedSubcategory = value;
-                            });
-                          },
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    // Selected Images Preview with dimension info
-                    if (_selectedImages.isNotEmpty)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Selected Images (Resized to 941x1280)',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 8),
-                          SizedBox(
-                            height: 100,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: _selectedImages.length,
-                              itemBuilder: (context, index) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: 8.0),
-                                  child: Stack(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.file(
-                                          _selectedImages[index],
-                                          width: 80,
-                                          height: 80,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      Positioned(
-                                        top: 0,
-                                        right: 0,
-                                        child: IconButton(
-                                          icon: const Icon(Icons.remove_circle,
-                                              color: Colors.red),
-                                          onPressed: () {
-                                            setState(() {
-                                              _selectedImages.removeAt(index);
-                                            });
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
+                              return const CircularProgressIndicator();
+                            }
+                            if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            }
+
+                            final categories = snapshot.data?.docs
+                                    .map((doc) => doc['name'] as String)
+                                    .toList() ??
+                                [];
+
+                            if (categories.isEmpty) {
+                              return const Text(
+                                'No categories available. Please add categories first.',
+                              );
+                            }
+
+                            return WillPopScope(
+                              onWillPop: () async {
+                                if (_selectedCategory != null) {
+                                  setState(() {
+                                    _selectedCategory = null;
+                                    _selectedSubcategory =
+                                        null; // Reset subcategory too
+                                  });
+                                  return false; // Block navigation
+                                }
+                                return true; // Allow navigation
                               },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey
+                                      .shade400, // Set background color to white
+                                  borderRadius: BorderRadius.circular(
+                                      12), // Rounded corners with more curve
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(
+                                          0.3), // Slightly stronger shadow
+                                      spreadRadius: 3,
+                                      blurRadius: 6,
+                                      offset: Offset(0,
+                                          5), // Position the shadow slightly more noticeable
+                                    ),
+                                  ],
+                                ),
+                                child: DropdownButton<String>(
+                                  isExpanded: true,
+                                  value: _selectedCategory,
+                                  hint: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal:
+                                            16.0), // Padding for hint text
+                                    child: const Text(
+                                      'Select Category',
+                                      style: TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 16), // Bigger font size
+                                    ),
+                                  ),
+                                  items: categories.map((category) {
+                                    return DropdownMenuItem<String>(
+                                      value: category,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12.0,
+                                            horizontal:
+                                                16.0), // More vertical space for items
+                                        child: Text(
+                                          category,
+                                          style: const TextStyle(
+                                            color: Colors.black,
+                                            fontSize:
+                                                16, // Consistent and readable font size
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedCategory = value;
+                                      _selectedSubcategory =
+                                          null; // Reset subcategory
+                                    });
+                                  },
+                                  underline:
+                                      Container(), // Remove the underline
+                                  iconSize:
+                                      30.0, // Make the dropdown icon bigger
+                                  style: TextStyle(
+                                      fontSize:
+                                          16), // Adjust text style for readability
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16.0,
+                                      vertical:
+                                          10.0), // Padding for the dropdown button
+                                ),
+                              ),
+                            );
+                          }),
+                      const SizedBox(height: 50),
+                      // Subcategory Dropdown
+                      StreamBuilder<DocumentSnapshot>(
+                        stream: _selectedCategory != null
+                            ? _firestore
+                                .collection('categories')
+                                .where('name', isEqualTo: _selectedCategory)
+                                .where('createdBy', isEqualTo: currentUser.uid)
+                                .snapshots()
+                                .map((snapshot) => snapshot.docs.first)
+                            : null,
+                        builder: (context, snapshot) {
+                          if (_selectedCategory == null ||
+                              snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                            return const SizedBox.shrink();
+                          }
+                          if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          }
+                          final subcategories = List<String>.from(
+                              snapshot.data?['subcategories'] ?? []);
+                          if (subcategories.isEmpty) {
+                            return const Text(
+                                'No subcategories available for this category.');
+                          }
+                          // if (_selectedSubcategory == null ||
+                          //     !subcategories.contains(_selectedSubcategory)) { this caused the pre loading.
+                          //   _selectedSubcategory = subcategories.first;
+                          // }
+                          return Container(
+                            decoration: BoxDecoration(
+                              color:
+                                  Colors.white, // Set background color to white
+                              borderRadius: BorderRadius.circular(
+                                  8), // Add rounded corners
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.2),
+                                  spreadRadius: 2,
+                                  blurRadius: 5,
+                                  offset: Offset(0, 3), // Shadow position
+                                ),
+                              ],
+                            ),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors
+                                    .grey.shade400, // Light grey background
+                                borderRadius: BorderRadius.circular(
+                                    12), // Rounded corners
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.3),
+                                    spreadRadius: 2,
+                                    blurRadius: 5,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: DropdownButton<String>(
+                                isExpanded: true,
+                                value: _selectedSubcategory,
+                                hint: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16.0),
+                                  child: Text(
+                                    'Select Subcategory',
+                                    style: TextStyle(
+                                      color: Colors.grey[800],
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                                items: subcategories.map((subcategory) {
+                                  return DropdownMenuItem<String>(
+                                    value: subcategory,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade100,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12.0,
+                                        horizontal: 16.0,
+                                      ),
+                                      child: Text(
+                                        subcategory,
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedSubcategory = value;
+                                  });
+                                },
+                                underline:
+                                    Container(), // Removes the default underline
+                                iconSize: 30.0,
+                                style: const TextStyle(fontSize: 16),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0, vertical: 10.0),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      // Selected Images Preview with dimension info
+                      if (_selectedImages.isNotEmpty)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Selected Images (Resized to 941x1280)',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              height: 100,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: _selectedImages.length,
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(right: 8.0),
+                                    child: Stack(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          child: Image.file(
+                                            _selectedImages[index],
+                                            width: 80,
+                                            height: 80,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 0,
+                                          right: 0,
+                                          child: IconButton(
+                                            icon: const Icon(
+                                                Icons.remove_circle,
+                                                color: Colors.red),
+                                            onPressed: () {
+                                              setState(() {
+                                                _selectedImages.removeAt(index);
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      const SizedBox(height: 16),
+                      // Buttons
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: _pickImages,
+                            icon: const Icon(
+                              Icons.add_photo_alternate,
+                              color: Colors.white,
+                            ),
+                            label: const Text(
+                              'Pick Images',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                          ElevatedButton.icon(
+                            onPressed: _selectedImages.isNotEmpty
+                                ? _uploadImages
+                                : null,
+                            icon: const Icon(Icons.cloud_upload,
+                                color: Colors.white),
+                            label: const Text('Upload',
+                                style: TextStyle(color: Colors.white)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    const SizedBox(height: 16),
-                    // Buttons
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: _pickImages,
-                          icon: const Icon(Icons.add_photo_alternate),
-                          label: const Text('Pick Images'),
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                        ElevatedButton.icon(
-                          onPressed:
-                              _selectedImages.isNotEmpty ? _uploadImages : null,
-                          icon: const Icon(Icons.cloud_upload),
-                          label: const Text('Upload'),
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }

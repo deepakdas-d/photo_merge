@@ -242,13 +242,23 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
                         if (categories.isEmpty) {
                           return const Text('No categories available');
                         }
-                        if (_selectedCategory == null ||
-                            !categories.contains(_selectedCategory)) {
-                          _selectedCategory = categories.first;
-                        }
+                        // if (_selectedCategory == null ||
+                        //     !categories.contains(_selectedCategory)) {
+                        //   _selectedCategory = categories.first;
+                        // }
                         return DropdownButtonFormField<String>(
                           isExpanded: true,
                           value: _selectedCategory,
+                          hint: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0), // Padding for hint text
+                            child: const Text(
+                              'Select Category',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 16), // Bigger font size
+                            ),
+                          ),
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.white,
