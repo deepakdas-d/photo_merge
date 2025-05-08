@@ -5,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/services.dart';
 import 'package:photomerge/User/View/categorey.dart';
+import 'package:photomerge/User/View/listimages.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UserDashboard extends StatefulWidget {
   const UserDashboard({super.key});
@@ -139,7 +141,8 @@ class _UserDashboardState extends State<UserDashboard> {
               SliverToBoxAdapter(child: _buildWelcomeSection()),
               SliverToBoxAdapter(child: _buildCategoriesSection()),
               SliverToBoxAdapter(child: _buildRecentImagesSection()),
-              SliverToBoxAdapter(child: _buildFeaturedCollectionsSection()),
+              SliverToBoxAdapter(child: _buildRecentVideosSection()),
+              SliverToBoxAdapter(child: _buildManageProfileSection(context)),
               const SliverToBoxAdapter(child: SizedBox(height: 24)),
             ],
           ),
@@ -238,6 +241,14 @@ class _UserDashboardState extends State<UserDashboard> {
               },
             ),
             _buildDrawerItem(
+              icon: Icons.video_library_outlined,
+              title: 'My Videos',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/listvedios');
+              },
+            ),
+            _buildDrawerItem(
               icon: Icons.workspace_premium_outlined,
               title: 'My Subscription',
               onTap: () {
@@ -315,7 +326,7 @@ class _UserDashboardState extends State<UserDashboard> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Discover and organize your photos',
+                  'Discover and organize your photos and videos',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
@@ -347,7 +358,7 @@ class _UserDashboardState extends State<UserDashboard> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Container(
-            height: 220,
+            height: 210,
             color: Colors.grey[200],
             child: const Center(
               child: CircularProgressIndicator(color: primaryColor),
@@ -395,9 +406,9 @@ class _UserDashboardState extends State<UserDashboard> {
             return Stack(
               children: [
                 CarouselSlider(
-                  key: const ValueKey('carousel'), // Prevent widget recreation
+                  key: const ValueKey('carousel'),
                   options: CarouselOptions(
-                    height: 300,
+                    height: 200,
                     autoPlay: true,
                     autoPlayInterval: const Duration(seconds: 5),
                     autoPlayAnimationDuration:
@@ -568,7 +579,7 @@ class _UserDashboardState extends State<UserDashboard> {
                         categories[index].data() as Map<String, dynamic>;
                     final name = categoryData['name'] as String? ??
                         'Category ${index + 1}';
-                    final imageUrl = categoryData['imageUrl'] as String? ?? '';
+                    final imageUrl = categoryData['image_url'] as String? ?? '';
 
                     return Padding(
                       padding: const EdgeInsets.only(right: 16),
@@ -621,19 +632,10 @@ class _UserDashboardState extends State<UserDashboard> {
                                         errorWidget: (context, url, error) =>
                                             Container(
                                           color: Colors.grey[200],
-                                          child: const Icon(
-                                            Icons.category,
-                                            color: accentColor,
-                                          ),
                                         ),
                                       )
                                     : Container(
-                                        color: Colors.grey[100],
-                                        child: const Icon(
-                                          Icons.category,
-                                          color: accentColor,
-                                          size: 28,
-                                        ),
+                                        color: Colors.grey[200],
                                       ),
                               ),
                             ),
@@ -667,7 +669,7 @@ class _UserDashboardState extends State<UserDashboard> {
 
   Widget _buildRecentImagesSection() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -676,23 +678,29 @@ class _UserDashboardState extends State<UserDashboard> {
             children: [
               Text(
                 'Recent Images',
-                style: Theme.of(context).textTheme.headlineSmall,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pushNamed(context, '/listimages');
                 },
                 style: TextButton.styleFrom(
-                  minimumSize: Size.zero,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  backgroundColor: primaryColor.withOpacity(0.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: Text(
                   'See All',
                   style: TextStyle(
                     color: primaryColor,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
                   ),
                 ),
               ),
@@ -708,32 +716,34 @@ class _UserDashboardState extends State<UserDashboard> {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const SizedBox(
-                  height: 240,
+                  height: 230,
                   child: Center(
-                    child: CircularProgressIndicator(color: primaryColor),
+                    child: CircularProgressIndicator(),
                   ),
                 );
               }
               if (snapshot.hasError) {
-                return SizedBox(
-                  height: 20,
+                return const SizedBox(
+                  height: 230,
                   child: Center(
                     child: Text(
-                      'Error loading recent images',
-                      style: TextStyle(color: Colors.red[300]),
+                      'Error loading images',
+                      style: TextStyle(color: Colors.redAccent),
                     ),
                   ),
                 );
               }
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                 return const SizedBox(
-                  height: 240,
-                  child: Center(child: Text('No recent images available')),
+                  height: 230,
+                  child: Center(
+                    child: Text('No images available'),
+                  ),
                 );
               }
               final images = snapshot.data!.docs;
               return SizedBox(
-                height: 245,
+                height: 230,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: images.length,
@@ -746,22 +756,31 @@ class _UserDashboardState extends State<UserDashboard> {
                     final timestamp = imageData['timestamp'] as Timestamp?;
                     final timeAgo = timestamp != null
                         ? _getTimeAgo(timestamp.toDate())
-                        : 'Unknown time';
+                        : 'Unknown';
+
                     return GestureDetector(
                       onTap: () {
-                        // TODO: Implement image detail navigation
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ImageDetailView(
+                              photoId: images[index].id,
+                              photoUrl: imageUrl,
+                            ),
+                          ),
+                        );
                       },
                       child: Container(
                         width: 140,
-                        margin: const EdgeInsets.only(right: 16),
+                        margin: const EdgeInsets.only(right: 12),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
@@ -769,79 +788,66 @@ class _UserDashboardState extends State<UserDashboard> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(20),
-                                topRight: Radius.circular(20),
-                              ),
+                              borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(16)),
                               child: Container(
-                                height: 170,
+                                height: 150,
                                 width: double.infinity,
                                 color: Colors.grey[200],
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    imageUrl.isNotEmpty
-                                        ? CachedNetworkImage(
-                                            imageUrl: imageUrl,
-                                            fit: BoxFit.cover,
-                                            placeholder: (context, url) =>
-                                                const Center(
-                                              child: CircularProgressIndicator(
-                                                color: primaryColor,
-                                                strokeWidth: 2,
-                                              ),
-                                            ),
-                                            errorWidget:
-                                                (context, url, error) =>
-                                                    const Center(
-                                              child: Icon(
-                                                Icons.broken_image_outlined,
-                                                color: Colors.grey,
-                                                size: 40,
-                                              ),
-                                            ),
-                                          )
-                                        : const Center(
-                                            child: Icon(
-                                              Icons.image,
-                                              color: Colors.grey,
-                                              size: 40,
-                                            ),
+                                child: imageUrl.isNotEmpty
+                                    ? CachedNetworkImage(
+                                        imageUrl: imageUrl,
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) =>
+                                            const Center(
+                                          child: CircularProgressIndicator(
+                                              strokeWidth: 2),
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            const Center(
+                                          child: Icon(
+                                            Icons.broken_image_outlined,
+                                            color: Colors.grey,
+                                            size: 40,
                                           ),
-                                  ],
-                                ),
+                                        ),
+                                      )
+                                    : const Center(
+                                        child: Icon(
+                                          Icons.image,
+                                          color: Colors.grey,
+                                          size: 40,
+                                        ),
+                                      ),
                               ),
                             ),
                             Padding(
-                              padding: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(8),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 4,
-                                    ),
+                                        horizontal: 8, vertical: 4),
                                     decoration: BoxDecoration(
                                       color: primaryColor.withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(6),
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
                                       category,
                                       style: TextStyle(
                                         color: primaryColor,
-                                        fontSize: 11,
+                                        fontSize: 12,
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: 4),
                                   Text(
                                     timeAgo,
                                     style: TextStyle(
-                                      color: Colors.grey[700],
                                       fontSize: 12,
-                                      fontWeight: FontWeight.w400,
+                                      color: Colors.grey[600],
                                     ),
                                   ),
                                 ],
@@ -861,14 +867,222 @@ class _UserDashboardState extends State<UserDashboard> {
     );
   }
 
-  Widget _buildFeaturedCollectionsSection() {
+  Widget _buildRecentVideosSection() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Recent Videos',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/listvedios');
+                },
+                style: TextButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  backgroundColor: primaryColor.withOpacity(0.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'See All',
+                  style: TextStyle(
+                    color: primaryColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          StreamBuilder<QuerySnapshot>(
+            stream: _firestore
+                .collection('videos')
+                .orderBy('timestamp', descending: true)
+                .limit(10)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SizedBox(
+                  height: 230,
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+              if (snapshot.hasError) {
+                return const SizedBox(
+                  height: 230,
+                  child: Center(
+                    child: Text(
+                      'Error loading videos',
+                      style: TextStyle(color: Colors.redAccent),
+                    ),
+                  ),
+                );
+              }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return const SizedBox(
+                  height: 230,
+                  child: Center(
+                    child: Text('No videos available'),
+                  ),
+                );
+              }
+              final videos = snapshot.data!.docs;
+              return SizedBox(
+                height: 230,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: videos.length,
+                  itemBuilder: (context, index) {
+                    final videoData =
+                        videos[index].data() as Map<String, dynamic>;
+                    final videoUrl = videoData['url'] as String? ?? '';
+                    final title = videoData['name'] as String? ?? 'Untitled';
+                    final timestamp = videoData['timestamp'] as Timestamp?;
+                    final timeAgo = timestamp != null
+                        ? _getTimeAgo(timestamp.toDate())
+                        : 'Unknown';
+                    final videoId = _extractYouTubeId(videoUrl);
+
+                    return GestureDetector(
+                      onTap: () async {
+                        final uri = Uri.parse(videoUrl);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri,
+                              mode: LaunchMode.externalApplication);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Cannot open video')),
+                          );
+                        }
+                      },
+                      child: Container(
+                        width: 140,
+                        margin: const EdgeInsets.only(right: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(16)),
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    height: 150,
+                                    width: double.infinity,
+                                    color: Colors.grey[200],
+                                    child: videoId.isNotEmpty
+                                        ? CachedNetworkImage(
+                                            imageUrl:
+                                                'https://img.youtube.com/vi/$videoId/mqdefault.jpg',
+                                            fit: BoxFit.cover,
+                                            placeholder: (context, url) =>
+                                                const Center(
+                                              child: CircularProgressIndicator(
+                                                  strokeWidth: 2),
+                                            ),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    const Center(
+                                              child: Icon(
+                                                Icons.videocam_off,
+                                                color: Colors.grey,
+                                                size: 40,
+                                              ),
+                                            ),
+                                          )
+                                        : const Center(
+                                            child: Icon(
+                                              Icons.videocam_off,
+                                              color: Colors.grey,
+                                              size: 40,
+                                            ),
+                                          ),
+                                  ),
+                                  Positioned.fill(
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.play_circle_outline,
+                                        color: Colors.white.withOpacity(0.9),
+                                        size: 48,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    title,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    timeAgo,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildManageProfileSection(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Featured Collections',
+            'Manage Account',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 16),
@@ -896,7 +1110,7 @@ class _UserDashboardState extends State<UserDashboard> {
                   right: -20,
                   bottom: -20,
                   child: Icon(
-                    Icons.photo_library,
+                    Icons.person,
                     size: 100,
                     color: Colors.white.withOpacity(0.2),
                   ),
@@ -912,7 +1126,7 @@ class _UserDashboardState extends State<UserDashboard> {
                           children: [
                             Flexible(
                               child: Text(
-                                'Organize Your Collection',
+                                'Personalize Your Profile',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize:
@@ -928,7 +1142,7 @@ class _UserDashboardState extends State<UserDashboard> {
                             const SizedBox(height: 6),
                             Flexible(
                               child: Text(
-                                'Create albums and manage your photos easily',
+                                'Update your info and customize settings',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize:
@@ -943,7 +1157,7 @@ class _UserDashboardState extends State<UserDashboard> {
                             const SizedBox(height: 8),
                             ElevatedButton(
                               onPressed: () {
-                                Navigator.pushNamed(context, '/Category');
+                                Navigator.pushNamed(context, '/profile');
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.white,
@@ -959,7 +1173,7 @@ class _UserDashboardState extends State<UserDashboard> {
                                 minimumSize: const Size(100, 32),
                               ),
                               child: const Text(
-                                'Get Started',
+                                'Edit Profile',
                                 style: TextStyle(fontSize: 12),
                               ),
                             ),
@@ -993,6 +1207,15 @@ class _UserDashboardState extends State<UserDashboard> {
     }
   }
 
+  String _extractYouTubeId(String url) {
+    final RegExp youtubeRegex = RegExp(
+      r'(?:https?://)?(?:www\.)?(?:youtube\.com/watch\?v=|youtu\.be/)([a-zA-Z0-9_-]{11})',
+      caseSensitive: false,
+    );
+    final match = youtubeRegex.firstMatch(url);
+    return match?.group(1) ?? '';
+  }
+
   Widget _buildDrawerItem({
     required IconData icon,
     required String title,
@@ -1013,14 +1236,19 @@ class GallerySearchDelegate extends SearchDelegate {
   @override
   ThemeData appBarTheme(BuildContext context) {
     return ThemeData(
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: _UserDashboardState.primaryColor,
         foregroundColor: _UserDashboardState.textColor,
+        elevation: 0,
       ),
       inputDecorationTheme: InputDecorationTheme(
-        hintStyle:
-            TextStyle(color: _UserDashboardState.textColor.withOpacity(0.6)),
+        hintStyle: TextStyle(
+          color: _UserDashboardState.textColor.withOpacity(0.6),
+          fontWeight: FontWeight.normal,
+        ),
         border: InputBorder.none,
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       ),
     );
   }
@@ -1029,7 +1257,7 @@ class GallerySearchDelegate extends SearchDelegate {
   List<Widget> buildActions(BuildContext context) {
     return [
       IconButton(
-        icon: const Icon(Icons.clear),
+        icon: Icon(Icons.clear, color: _UserDashboardState.textColor),
         onPressed: () {
           query = '';
         },
@@ -1040,7 +1268,7 @@ class GallerySearchDelegate extends SearchDelegate {
   @override
   Widget buildLeading(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.arrow_back),
+      icon: Icon(Icons.arrow_back, color: _UserDashboardState.textColor),
       onPressed: () {
         close(context, null);
       },
@@ -1061,43 +1289,115 @@ class GallerySearchDelegate extends SearchDelegate {
     if (query.isEmpty) {
       return Container(
         color: _UserDashboardState.secondaryColor,
-        child: const Center(child: Text('Enter a search term')),
+        child: Center(
+          child: Text(
+            'Enter a search term',
+            style: TextStyle(
+              color: _UserDashboardState.textColor.withOpacity(0.7),
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ),
       );
     }
 
     return Container(
       color: _UserDashboardState.secondaryColor,
       child: StreamBuilder<QuerySnapshot>(
-        stream: _firestore
-            .collection('categories')
-            .where('name', isGreaterThanOrEqualTo: query)
-            .where('name', isLessThanOrEqualTo: '$query\uf8ff')
-            .snapshots(),
+        stream: _firestore.collection('categories').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(
-                  color: _UserDashboardState.accentColor),
+                color: _UserDashboardState.accentColor,
+              ),
             );
           }
           if (snapshot.hasError) {
-            return const Center(child: Text('Error loading suggestions'));
+            return Center(
+              child: Text(
+                'Error loading suggestions',
+                style: TextStyle(
+                  color: _UserDashboardState.textColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            );
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No suggestions found'));
+            return Center(
+              child: Text(
+                'No suggestions found',
+                style: TextStyle(
+                  color: _UserDashboardState.textColor.withOpacity(0.7),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            );
           }
-          final categories = snapshot.data!.docs;
+          // Filter categories client-side for case-insensitive matching
+          final searchQuery = query.toLowerCase();
+          final categories = snapshot.data!.docs.where((doc) {
+            final name = (doc['name'] as String? ?? '').toLowerCase();
+            return name.contains(searchQuery);
+          }).toList();
+
+          if (categories.isEmpty) {
+            return Center(
+              child: Text(
+                'No suggestions found',
+                style: TextStyle(
+                  color: _UserDashboardState.textColor.withOpacity(0.7),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            );
+          }
+
           return ListView.builder(
+            padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: categories.length,
             itemBuilder: (context, index) {
               final categoryData =
                   categories[index].data() as Map<String, dynamic>;
               final name =
                   categoryData['name'] as String? ?? 'Category ${index + 1}';
+              final imageUrl = categoryData['image_url'] as String?;
               return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: ListTile(
-                  title: Text(name),
+                  leading: imageUrl != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            imageUrl,
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              Icons.category,
+                              color: _UserDashboardState.accentColor,
+                              size: 40,
+                            ),
+                          ),
+                        )
+                      : Icon(
+                          Icons.category,
+                          color: _UserDashboardState.accentColor,
+                          size: 40,
+                        ),
+                  title: Text(
+                    name,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: _UserDashboardState.textColor,
+                    ),
+                  ),
                   onTap: () {
                     Navigator.push(
                       context,

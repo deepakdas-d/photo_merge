@@ -1,7 +1,5 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:photomerge/Admin/a_listimages.dart';
 import 'package:photomerge/Admin/add_posters.dart';
 import 'package:photomerge/Admin/categoreymanagment.dart';
@@ -69,11 +67,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
           Navigator.pushNamed(context, '/submanage')
     },
     {
-      'icon': Icons.money_rounded,
+      'icon': Icons.view_carousel,
       'title': 'Carousel',
       'subtitle': 'Manage carousel items.',
       'onTap': (BuildContext context) =>
           Navigator.pushNamed(context, '/carousel')
+    },
+    {
+      'icon': Icons.video_collection_sharp,
+      'title': 'Video Carousel',
+      'subtitle': 'Manage video carousel items.',
+      'onTap': (BuildContext context) =>
+          Navigator.pushNamed(context, '/vediourl')
     },
   ];
 
@@ -93,7 +98,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
         _adminEmail = currentUser.email;
       });
     } else {
-      // If no user is signed in, redirect to login
       Navigator.pushReplacementNamed(context, '/login');
     }
   }
@@ -121,7 +125,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
@@ -130,22 +133,26 @@ class _AdminDashboardState extends State<AdminDashboard> {
           builder: (context) => AlertDialog(
             title: Text(
               'Exit App',
-              style: GoogleFonts.oswald(fontSize: 20),
+              style: TextStyle(fontFamily: 'Roboto', fontSize: 20),
             ),
             content: Text('Do you really want to close the app?'),
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text('No'),
+                child: Text('No', style: TextStyle(color: Colors.green[600])),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text('Yes'),
+                child: Text('Yes', style: TextStyle(color: Colors.green[600])),
               ),
             ],
           ),
         );
-        return shouldExit ?? false; // default to false if null
+        return shouldExit ?? false;
       },
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -160,8 +167,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 }
               });
             },
-            icon: Icon(Icons.search),
-            color: Colors.white,
+            icon: Icon(Icons.search, color: Colors.white),
           ),
           title: _isSearching
               ? TextField(
@@ -169,7 +175,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   autofocus: true,
                   onChanged: _filterSearch,
                   decoration: InputDecoration(
-                    hintText: 'Search...',
+                    hintText: 'Search actions...',
                     hintStyle: TextStyle(color: Colors.white70),
                     border: InputBorder.none,
                   ),
@@ -177,124 +183,117 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 )
               : Text(
                   'Admin Dashboard',
-                  style: GoogleFonts.oswald(
+                  style: TextStyle(
+                    fontFamily: 'Roboto',
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
-          backgroundColor: Colors.green,
+          backgroundColor: Colors.green[600],
+          elevation: 0,
           centerTitle: true,
           actions: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.green,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.logout, color: Colors.white),
-                tooltip: 'Sign Out',
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        backgroundColor: Colors.green[50],
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+            IconButton(
+              icon: Icon(Icons.logout, color: Colors.white),
+              tooltip: 'Sign Out',
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      title: Text(
+                        'Confirm Logout',
+                        style: TextStyle(
+                          fontFamily: 'Roboto',
+                          fontWeight: FontWeight.bold,
                         ),
-                        title: Text(
-                          'Confirm Logout',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ),
+                      content: Text('Are you sure you want to log out?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text('Cancel',
+                              style: TextStyle(color: Colors.green[600])),
                         ),
-                        content: Text(
-                          'Are you sure you want to log out?',
-                          style: TextStyle(color: Colors.black),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            _signOut();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green[600],
+                            foregroundColor: Colors.white,
+                          ),
+                          child: Text('Logout'),
                         ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('Cancel'),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              _signOut();
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                            ),
-                            child: const Text('Logout'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-              ),
+                      ],
+                    );
+                  },
+                );
+              },
             ),
           ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Welcome Message
-              Container(
-                padding: EdgeInsets.all(16.0),
-                margin: EdgeInsets.symmetric(vertical: 5.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.3),
-                      spreadRadius: 2,
-                      blurRadius: 6,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Text(
-                    'Welcome, ${_adminEmail ?? 'Admin'}!',
-                    style: GoogleFonts.oswald(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Manage your photo gallery:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: Container(
+        body: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Welcome Message
+                Container(
                   padding: EdgeInsets.all(16.0),
+                  margin: EdgeInsets.symmetric(vertical: 8.0),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16.0),
+                    color: Colors.green[100],
+                    borderRadius: BorderRadius.circular(12.0),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.2),
-                        blurRadius: 8,
-                        spreadRadius: 2,
-                        offset: Offset(0, 4),
+                        blurRadius: 6,
+                        spreadRadius: 1,
+                        offset: Offset(0, 2),
                       ),
                     ],
                   ),
+                  child: Center(
+                    child: Text(
+                      'Welcome, ${_adminEmail ?? 'Admin'}!',
+                      style: TextStyle(
+                        fontFamily: 'Roboto',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green[800],
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Manage Your Gallery:',
+                  style: TextStyle(
+                    fontFamily: 'Roboto',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.green[800],
+                  ),
+                ),
+                SizedBox(height: 16),
+                Expanded(
                   child: _filteredActions.isEmpty
                       ? Center(
                           child: Text(
                             'No matching actions found.',
                             style: TextStyle(
+                              fontFamily: 'Roboto',
                               fontSize: 16,
                               color: Colors.grey[600],
                             ),
@@ -304,9 +303,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
-                            crossAxisSpacing: 12.0,
-                            mainAxisSpacing: 12.0,
-                            childAspectRatio: 1.10,
+                            crossAxisSpacing: 16.0,
+                            mainAxisSpacing: 16.0,
+                            childAspectRatio: 1.0,
                           ),
                           itemCount: _filteredActions.length,
                           itemBuilder: (context, index) {
@@ -325,15 +324,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           },
                         ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  // Updated _buildActionTile method with continuous subtitle animation
   Widget _buildActionTile(
     BuildContext context, {
     required IconData icon,
@@ -341,54 +339,65 @@ class _AdminDashboardState extends State<AdminDashboard> {
     required String subtitle,
     required VoidCallback onTap,
   }) {
-    return Card(
-      color: Colors.white,
-      elevation: 3,
-      margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.green,
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: Icon(icon, size: 20, color: Colors.white),
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              blurRadius: 6,
+              spreadRadius: 1,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.green[600],
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.3),
+                    blurRadius: 6,
+                    spreadRadius: 1,
+                  ),
+                ],
               ),
-              SizedBox(height: 8),
-              Text(
-                title,
-                style: TextStyle(fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              child: Icon(icon, size: 24, color: Colors.white),
+            ),
+            SizedBox(height: 12),
+            Text(
+              title,
+              style: TextStyle(
+                fontFamily: 'Roboto',
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.green[800],
               ),
-              SizedBox(height: 4),
-              // Continuous subtitle animation
-              SubtitleWithAnimation(
-                text: subtitle,
-              ),
-            ],
-          ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            SizedBox(height: 8),
+            SubtitleWithAnimation(
+              text: subtitle,
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-// Custom widget for continuous subtitle animation
 class SubtitleWithAnimation extends StatefulWidget {
   final String text;
 
@@ -404,45 +413,19 @@ class SubtitleWithAnimation extends StatefulWidget {
 class _SubtitleWithAnimationState extends State<SubtitleWithAnimation>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-
-    // Create an animation controller that repeats forever
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(seconds: 2),
       vsync: this,
     );
-
-    // Create a subtle sliding animation
-    _slideAnimation = TweenSequence<Offset>([
-      TweenSequenceItem(
-        tween: Tween<Offset>(
-          begin: Offset(0.0, 0.0),
-          end: Offset(-0.025, 0.0),
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 30,
-      ),
-      TweenSequenceItem(
-        tween: Tween<Offset>(
-          begin: Offset(-0.025, 0.0),
-          end: Offset(0.025, 0.0),
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 40,
-      ),
-      TweenSequenceItem(
-        tween: Tween<Offset>(
-          begin: Offset(0.025, 0.0),
-          end: Offset(0.0, 0.0),
-        ).chain(CurveTween(curve: Curves.easeInOut)),
-        weight: 30,
-      ),
-    ]).animate(_controller);
-
-    // Start the animation and make it repeat
-    _controller.repeat();
+    _fadeAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+    _controller.repeat(reverse: true);
   }
 
   @override
@@ -453,12 +436,16 @@ class _SubtitleWithAnimationState extends State<SubtitleWithAnimation>
 
   @override
   Widget build(BuildContext context) {
-    return SlideTransition(
-      position: _slideAnimation,
+    return FadeTransition(
+      opacity: _fadeAnimation,
       child: Text(
         widget.text,
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 12),
+        style: TextStyle(
+          fontFamily: 'Roboto',
+          fontSize: 12,
+          color: Colors.green[700],
+        ),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),

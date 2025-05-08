@@ -22,7 +22,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Modern color palette
   static const Color primaryColor = Color(0xFF4CAF50);
-  static const Color accentColor = Color(0xFF26A69A);
   static const Color backgroundColor = Color(0xFFF8FAFC);
   static const Color cardColor = Colors.white;
   static const Color textColor = Color(0xFF1A1A1A);

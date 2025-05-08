@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:photomerge/User/View/categorey.dart';
 
 class CategoryListPage extends StatefulWidget {
@@ -11,7 +12,7 @@ class CategoryListPage extends StatefulWidget {
 
 class _CategoryListPageState extends State<CategoryListPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  List<String> _categories = [];
+  List<Map<String, dynamic>> _categories = [];
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -29,19 +30,19 @@ class _CategoryListPageState extends State<CategoryListPage> {
       });
 
       final QuerySnapshot querySnapshot =
-          await _firestore.collectionGroup('images').get();
+          await _firestore.collection('categories').orderBy('name').get();
 
-      final Set<String> categories = {};
-
-      for (var doc in querySnapshot.docs) {
+      final List<Map<String, dynamic>> categories =
+          querySnapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
-        if (data.containsKey('category') && data['category'] != null) {
-          categories.add(data['category'].toString());
-        }
-      }
+        return {
+          'name': data['name']?.toString() ?? 'Category ${doc.id}',
+          'image_url': data['image_url']?.toString() ?? '',
+        };
+      }).toList();
 
       setState(() {
-        _categories = categories.toList()..sort();
+        _categories = categories;
         _isLoading = false;
       });
     } catch (e) {
@@ -144,6 +145,9 @@ class _CategoryListPageState extends State<CategoryListPage> {
       itemCount: _categories.length,
       itemBuilder: (context, index) {
         final category = _categories[index];
+        final categoryName = category['name'] as String;
+        final imageUrl = category['image_url'] as String;
+
         return Card(
           elevation: 1,
           margin: const EdgeInsets.only(bottom: 8),
@@ -152,7 +156,8 @@ class _CategoryListPageState extends State<CategoryListPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Mycategory(categoryFilter: category),
+                  builder: (context) =>
+                      Mycategory(categoryFilter: categoryName),
                 ),
               );
             },
@@ -160,12 +165,40 @@ class _CategoryListPageState extends State<CategoryListPage> {
               padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
-                  const Icon(Icons.photo_library,
-                      size: 24, color: Color(0xFF4CAF50)),
+                  ClipOval(
+                    child: imageUrl.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              width: 40,
+                              height: 40,
+                              color: Colors.grey[200],
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Color(0xFF4CAF50),
+                                ),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              width: 40,
+                              height: 40,
+                              color: Colors.grey[200],
+                            ),
+                          )
+                        : Container(
+                            width: 40,
+                            height: 40,
+                            color: Colors.grey[200],
+                          ),
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      category,
+                      categoryName,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
