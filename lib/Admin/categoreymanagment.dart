@@ -1,7 +1,12 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 import 'package:photomerge/Admin/list_categories_and_subcategories.dart';
 
 class CategoryManagementPage extends StatefulWidget {
@@ -19,12 +24,55 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
   final ScrollController _scrollController = ScrollController();
   String? _selectedCategory;
   bool _isLoading = false;
+  File? _selectedImage;
+
+  Future<String?> _uploadToCloudinary(File image) async {
+    try {
+      final url = Uri.parse('https://api.cloudinary.com/v1_1/dfchqxsdz/upload');
+      final request = http.MultipartRequest('POST', url);
+
+      request.fields['upload_preset'] = 'TempApp';
+      request.files.add(await http.MultipartFile.fromPath('file', image.path));
+
+      final response = await request.send();
+      if (response.statusCode == 200) {
+        final responseData = await response.stream.toBytes();
+        final responseString = String.fromCharCodes(responseData);
+        final jsonMap = jsonDecode(responseString);
+        return jsonMap['secure_url'] as String;
+      } else {
+        throw HttpException('Upload failed with status ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error uploading to Cloudinary: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error uploading to Cloudinary: $e')),
+      );
+      return null;
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
 
   Future<void> _addCategory() async {
     final categoryName = _categoryController.text.trim();
     if (categoryName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a category name')),
+      );
+      return;
+    }
+    if (_selectedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an image')),
       );
       return;
     }
@@ -36,8 +84,16 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
         throw Exception('No user signed in');
       }
 
+      // Upload image to Cloudinary
+      final imageUrl = await _uploadToCloudinary(_selectedImage!);
+      if (imageUrl == null) {
+        throw Exception('Failed to upload image');
+      }
+
+      // Add category to Firestore with image URL
       await _firestore.collection('categories').add({
         'name': categoryName,
+        'image_url': imageUrl,
         'subcategories': [],
         'createdBy': currentUser.uid,
         'timestamp': FieldValue.serverTimestamp(),
@@ -47,6 +103,9 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
         const SnackBar(content: Text('Category added successfully')),
       );
       _categoryController.clear();
+      setState(() {
+        _selectedImage = null;
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error adding category: $e')),
@@ -185,8 +244,10 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
                 builder: (context) => const ListCategoriesAndSubcategories(),
               ),
             ),
-            icon:
-                const Icon(Icons.list), // You can change this icon as you like
+            icon: const Icon(
+              Icons.list,
+              color: Colors.white,
+            ), // You can change this icon as you like
             tooltip: 'View Categories',
           ),
         ],
@@ -218,10 +279,43 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
                       ),
                     ),
                     const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _selectedImage != null
+                              ? Image.file(
+                                  _selectedImage!,
+                                  height: 100,
+                                  width: 100,
+                                  fit: BoxFit.cover,
+                                )
+                              : Container(
+                                  height: 100,
+                                  width: 100,
+                                  color: Colors.grey[200],
+                                  child: Icon(Icons.image,
+                                      color: Colors.grey[600]),
+                                ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: _pickImage,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                          ),
+                          child: const Text(
+                            'Pick Image',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
                     ElevatedButton(
                       onPressed: _addCategory,
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green),
+                        backgroundColor: Colors.green,
+                      ),
                       child: const Text(
                         'Add Category',
                         style: TextStyle(color: Colors.white),
@@ -229,12 +323,14 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
                     ),
                     const SizedBox(height: 16),
                     // Add Subcategory
-                    Text('Add Subcategory',
-                        style: GoogleFonts.oswald(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        )),
+                    Text(
+                      'Add Subcategory',
+                      style: GoogleFonts.oswald(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     StreamBuilder<QuerySnapshot>(
                       stream: _firestore
@@ -256,21 +352,18 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
                         if (categories.isEmpty) {
                           return const Text('No categories available');
                         }
-                        // if (_selectedCategory == null ||
-                        //     !categories.contains(_selectedCategory)) {this caused the loading.
-                        //   _selectedCategory = categories.first;
-                        // }
                         return DropdownButtonFormField<String>(
                           isExpanded: true,
                           value: _selectedCategory,
                           hint: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16.0), // Padding for hint text
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
                             child: const Text(
                               'Select Category',
                               style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 16), // Bigger font size
+                                color: Colors.black,
+                                fontSize: 16,
+                              ),
                             ),
                           ),
                           decoration: InputDecoration(
@@ -281,16 +374,16 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
                               borderSide: BorderSide(color: Colors.grey),
                             ),
                             contentPadding: EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
                           ),
                           items: categories
                               .map((category) => DropdownMenuItem<String>(
                                     value: category,
                                     child: Text(
                                       category,
-                                      style: TextStyle(
-                                          color: Colors
-                                              .black), // Ensure visibility
+                                      style: TextStyle(color: Colors.black),
                                     ),
                                   ))
                               .toList(),
@@ -315,8 +408,9 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
                     ElevatedButton(
                       onPressed: _addSubcategory,
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green),
-                      child: Text(
+                        backgroundColor: Colors.green,
+                      ),
+                      child: const Text(
                         'Add Subcategory',
                         style: TextStyle(color: Colors.white),
                       ),
@@ -353,8 +447,7 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
                     //       }
                     //       return Scrollbar(
                     //         controller: _scrollController,
-                    //         thumbVisibility:
-                    //             true, // Show scrollbar when scrolling
+                    //         thumbVisibility: true,
                     //         thickness: 6,
                     //         radius: const Radius.circular(8),
                     //         child: ListView.builder(
