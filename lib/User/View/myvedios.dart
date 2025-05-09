@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:photomerge/User/View/home.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AllVideosPage extends StatefulWidget {
@@ -28,19 +30,30 @@ class _AllVideosPageState extends State<AllVideosPage> {
     return Scaffold(
       backgroundColor: _backgroundColor,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         leading: IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.arrow_back,
-              color: Colors.white,
-            )),
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UserDashboard(),
+                ));
+          },
+          icon: Icon(
+            Icons.arrow_back,
+          ),
+          color: Colors.green,
+        ),
         automaticallyImplyLeading: false,
-        title: const Text(
+        title: Text(
           'Video Gallery',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          style: GoogleFonts.oswald(
+            color: Colors.green,
+            fontSize: 25,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         elevation: 0,
-        backgroundColor: _primaryColor,
       ),
       body: SafeArea(
         child: _buildVideosSection(),
@@ -102,7 +115,7 @@ class _AllVideosPageState extends State<AllVideosPage> {
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: _getGridCrossAxisCount(context),
-              childAspectRatio: 1.0, // Square cards for balance
+              childAspectRatio: 0.9, // Square cards for balance
               crossAxisSpacing: _smallPadding,
               mainAxisSpacing: _standardPadding,
             ),

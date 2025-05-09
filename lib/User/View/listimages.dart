@@ -6,8 +6,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_image_gallery_saver/flutter_image_gallery_saver.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:photomerge/User/View/home.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -92,9 +95,29 @@ class _ListImagesState extends State<ListImages> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF4CAF50),
-        title:
-            const Text('Photo Gallery', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.white,
+        title: Text(
+          'Gallery',
+          style: GoogleFonts.oswald(
+            color: Colors.green,
+            fontSize: 25,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UserDashboard(),
+                ));
+          },
+          icon: Icon(
+            Icons.arrow_back,
+          ),
+          color: Colors.green,
+        ),
       ),
       body: _documents.isEmpty && _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -202,7 +225,7 @@ class _ImageDetailViewState extends State<ImageDetailView>
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 5000),
       vsync: this,
     )..forward();
     _fadeAnimation = CurvedAnimation(
@@ -1045,19 +1068,55 @@ class _ImageDetailViewState extends State<ImageDetailView>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFF4CAF50),
-        title:
-            const Text('Image Details', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.white,
+        title: Text(
+          'Image Details',
+          style: GoogleFonts.oswald(
+            color: Colors.green,
+            fontSize: 25,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UserDashboard(),
+                ));
+          },
+          icon: Icon(
+            Icons.arrow_back,
+          ),
+          color: Colors.green,
+        ),
       ),
-      body: userData == null
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+      body: FutureBuilder(
+        future: Future.delayed(Duration(seconds: 3)), // Delay for 3 seconds
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // Show loader while waiting
+            return Center(
+              child: Lottie.asset(
+                'assets/animations/image_generating.json',
+                width: 200,
+                height: 200,
+                fit: BoxFit.contain,
+              ),
+            );
+          } else {
+            // Show the photo card content after delay
+            return SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: _buildPhotoCard(
                     widget.photoId, widget.photoUrl, _backgroundColor),
               ),
-            ),
+            );
+          }
+        },
+      ),
     );
   }
 }

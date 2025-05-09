@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:google_fonts/google_fonts.dart' show GoogleFonts;
 import 'package:photomerge/User/View/categorey.dart';
+import 'package:photomerge/User/View/home.dart';
 
 class CategoryListPage extends StatefulWidget {
   const CategoryListPage({Key? key}) : super(key: key);
@@ -58,14 +60,28 @@ class _CategoryListPageState extends State<CategoryListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        backgroundColor: Colors.white,
+        title: Text(
           'Categories',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+          style: GoogleFonts.oswald(
+            color: Colors.green,
+            fontSize: 25,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        backgroundColor: const Color(0xFF4CAF50),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UserDashboard(),
+                ));
+          },
+          icon: Icon(
+            Icons.arrow_back,
+          ),
+          color: Colors.green,
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _fetchCategories,

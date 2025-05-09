@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:photomerge/User/View/home.dart';
 import 'package:photomerge/User/View/listimages.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -180,13 +182,34 @@ class _MycategoryState extends State<Mycategory> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF4CAF50),
-        title: Text('${widget.categoryFilter} Photos',
-            style: const TextStyle(color: Colors.white)),
+        backgroundColor: Colors.white,
+        title: Text(
+          '${widget.categoryFilter} Photos',
+          style: GoogleFonts.oswald(
+            fontSize: 25,
+            color: Colors.green,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UserDashboard(),
+                ));
+          },
+          icon: Icon(
+            Icons.arrow_back,
+          ),
+          color: Colors.green,
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
+            icon: const Icon(Icons.refresh, color: Colors.green),
             onPressed: _refreshImages,
           ),
         ],

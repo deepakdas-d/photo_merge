@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -470,14 +471,14 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildAppBar() {
     return SliverAppBar(
       pinned: true,
-      backgroundColor: primaryColor,
+      backgroundColor: Colors.white,
       elevation: 0,
       automaticallyImplyLeading: false,
-      title: const Text(
+      title: Text(
         'My Profile',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 20,
+        style: GoogleFonts.oswald(
+          color: Colors.green,
+          fontSize: 25,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -487,7 +488,7 @@ class _ProfilePageState extends State<ProfilePage> {
           IconButton(
             icon: Icon(
               _isEditing ? Icons.check : Icons.edit_outlined,
-              color: Colors.white,
+              color: Colors.green,
               size: 24,
             ),
             onPressed: _isEditing
@@ -507,7 +508,7 @@ class _ProfilePageState extends State<ProfilePage> {
         icon: Icon(
           Icons.arrow_back,
         ),
-        color: Colors.white,
+        color: Colors.green,
       ),
     );
   }

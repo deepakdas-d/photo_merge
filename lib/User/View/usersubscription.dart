@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:photomerge/User/View/home.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:async';
 
@@ -214,17 +216,32 @@ class _UserSubscriptionPageState extends State<UserSubscriptionPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UserDashboard(),
+                ));
+          },
+          icon: Icon(
+            Icons.arrow_back,
+          ),
+          color: Colors.green,
+        ),
+        title: Text(
           'My Subscription',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+          style: GoogleFonts.oswald(
+            color: Colors.green,
+            fontSize: 25,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        backgroundColor: const Color(0xFF4CAF50),
+        backgroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
+            icon: const Icon(Icons.refresh, color: Colors.green),
             onPressed: () {
               setState(() {
                 _isLoading = true;

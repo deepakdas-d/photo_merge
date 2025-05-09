@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:photomerge/User/View/categorey.dart';
 import 'package:photomerge/User/View/listimages.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -113,46 +114,102 @@ class _UserDashboardState extends State<UserDashboard> {
           ),
         ),
       ),
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: cardColor,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {
-                showSearch(context: context, delegate: GallerySearchDelegate());
-              },
+      child: PopScope(
+        canPop: false, // Prevent default pop
+        onPopInvoked: (didPop) async {
+          if (!didPop) {
+            final shouldExit = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                title: const Text(
+                  'Exit App',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                content: const Text(
+                  'Are you sure you want to exit the app?',
+                  style: TextStyle(color: Colors.black87),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(false),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.green,
+                    ),
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text(
+                      'Exit',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            );
+
+            if (shouldExit == true) {
+              // Exit the app
+              Navigator.of(context).maybePop(); // or SystemNavigator.pop();
+            }
+          }
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: cardColor,
+            title: Text(
+              "HOME",
+              style: GoogleFonts.oswald(color: Colors.green, fontSize: 25),
             ),
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _getUserData,
-            ),
-          ],
-        ),
-        drawer: userId != null ? _buildDrawer() : null,
-        body: RefreshIndicator(
-          color: primaryColor,
-          onRefresh: _getUserData,
-          child: CustomScrollView(
-            controller: _scrollController,
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(child: _buildCarousel()),
-              SliverToBoxAdapter(child: _buildWelcomeSection()),
-              SliverToBoxAdapter(child: _buildCategoriesSection()),
-              SliverToBoxAdapter(child: _buildRecentImagesSection()),
-              SliverToBoxAdapter(child: _buildRecentVideosSection()),
-              SliverToBoxAdapter(child: _buildManageProfileSection(context)),
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  showSearch(
+                      context: context, delegate: GallerySearchDelegate());
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: _getUserData,
+              ),
             ],
           ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/listimages');
-          },
-          backgroundColor: primaryColor,
-          child: const Icon(Icons.photo_library, color: Colors.white),
+          drawer: userId != null ? _buildDrawer() : null,
+          body: RefreshIndicator(
+            color: primaryColor,
+            onRefresh: _getUserData,
+            child: CustomScrollView(
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverToBoxAdapter(child: _buildCarousel()),
+                SliverToBoxAdapter(child: _buildWelcomeSection()),
+                SliverToBoxAdapter(child: _buildCategoriesSection()),
+                SliverToBoxAdapter(child: _buildRecentImagesSection()),
+                SliverToBoxAdapter(child: _buildRecentVideosSection()),
+                SliverToBoxAdapter(child: _buildManageProfileSection(context)),
+                const SliverToBoxAdapter(child: SizedBox(height: 24)),
+              ],
+            ),
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/listimages');
+            },
+            backgroundColor: primaryColor,
+            child: const Icon(Icons.photo_library, color: Colors.white),
+          ),
         ),
       ),
     );
@@ -179,24 +236,33 @@ class _UserDashboardState extends State<UserDashboard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: Colors.white,
-                    child: Text(
-                      userData?['name']?.isNotEmpty == true
-                          ? userData!['name'][0].toUpperCase()
-                          : 'U',
-                      style: const TextStyle(
-                        color: primaryColor,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                  Material(
+                    elevation: 4, // Adjust elevation for the shadow effect
+                    shape:
+                        CircleBorder(), // Ensures the Material stays circular
+                    child: CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.white,
+                      child: Align(
+                        alignment:
+                            Alignment.center, // Ensures the text is centered
+                        child: Text(
+                          userData?['firstName']?.isNotEmpty == true
+                              ? userData!['firstName'][0].toUpperCase()
+                              : 'U',
+                          style: const TextStyle(
+                            color: primaryColor,
+                            fontSize: 32, // Adjust font size as needed
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    userData?['name']?.isNotEmpty == true
-                        ? userData!['name']
+                    userData?['firstName']?.isNotEmpty == true
+                        ? userData!['firstName']
                         : 'User',
                     style: const TextStyle(
                       color: Colors.white,
@@ -282,18 +348,37 @@ class _UserDashboardState extends State<UserDashboard> {
                 final shouldLogout = await showDialog<bool>(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: const Text('Log Out'),
-                    content: const Text('Are you sure you want to log out?'),
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    title: const Text(
+                      'Exit App',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    content: const Text(
+                      'Are you sure you want to exit the app?',
+                      style: TextStyle(color: Colors.black87),
+                    ),
                     actions: [
                       TextButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: const Text('Cancel'),
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: const Text(
+                          'Cancel',
+                          style: TextStyle(color: Colors.black),
+                        ),
                       ),
                       TextButton(
-                        onPressed: () => Navigator.pop(context, true),
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.green,
+                        ),
+                        onPressed: () => Navigator.of(context).pop(true),
                         child: const Text(
-                          'Log Out',
-                          style: TextStyle(color: primaryColor),
+                          'Exit',
+                          style: TextStyle(color: Colors.white),
                         ),
                       ),
                     ],
@@ -312,6 +397,8 @@ class _UserDashboardState extends State<UserDashboard> {
   }
 
   Widget _buildWelcomeSection() {
+    // print('userData: $userData');
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
       child: Row(
@@ -320,15 +407,26 @@ class _UserDashboardState extends State<UserDashboard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Welcome${userData?['name']?.isNotEmpty == true ? ", ${userData!['name']}" : ""}',
-                  style: Theme.of(context).textTheme.headlineSmall,
+                RichText(
+                  text: TextSpan(
+                    text:
+                        'Welcome${userData?['firstName']?.isNotEmpty == true ? ", ${userData!['firstName']}" : ""}',
+                    style: GoogleFonts.oswald(
+                      fontSize: 34,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 15),
                 Text(
                   'Discover and organize your photos and videos',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(fontSize: 15),
+                )
               ],
             ),
           ),
@@ -426,10 +524,9 @@ class _UserDashboardState extends State<UserDashboard> {
                   items: imageUrls.map((imageUrl) {
                     return Container(
                       width: MediaQuery.of(context).size.width,
-                      color: Colors.black,
+                      color: Colors.transparent,
                       child: AspectRatio(
-                        aspectRatio:
-                            1041 / 736, // matches your image aspect ratio
+                        aspectRatio: 1 / 4, // matches your image aspect ratio
                         child: CachedNetworkImage(
                           imageUrl: imageUrl,
                           fit: BoxFit.contain, // prevents cropping
@@ -501,10 +598,12 @@ class _UserDashboardState extends State<UserDashboard> {
                   Navigator.pushNamed(context, '/Category');
                 },
                 style: TextButton.styleFrom(
-                  minimumSize: Size.zero,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  backgroundColor: primaryColor.withOpacity(0.1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: Text(
                   'See All',
