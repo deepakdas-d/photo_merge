@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -115,6 +116,17 @@ class _AdminImageUploadPageState extends State<AdminImageUploadPage> {
 
       for (int i = 0; i < images.length; i++) {
         if (images[i] != null) {
+          // Decode image dimensions
+          final bytes = await images[i]!.readAsBytes();
+          final codec = await ui.instantiateImageCodec(bytes);
+          final frame = await codec.getNextFrame();
+          final image = frame.image;
+
+          final isLandscape = image.width > image.height;
+          if (!isLandscape) {
+            throw Exception('Image ${i + 1} is not in landscape orientation.');
+          }
+
           final url = await _uploadToCloudinary(images[i]!);
           if (url != null) {
             updatedUrls[i] = url;

@@ -74,7 +74,17 @@ class UserListPage extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: ListTile(
-                  leading: const Icon(Icons.person),
+                  leading: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CircleAvatar(
+                      backgroundColor: Colors.green
+                          .withOpacity(0.1), // Background circle color
+                      child: Icon(
+                        Icons.person,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ),
                   title: Text(email),
                   subtitle: Text('Role: $role'),
                   trailing: Row(

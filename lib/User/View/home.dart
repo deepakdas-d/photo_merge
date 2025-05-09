@@ -408,7 +408,7 @@ class _UserDashboardState extends State<UserDashboard> {
                 CarouselSlider(
                   key: const ValueKey('carousel'),
                   options: CarouselOptions(
-                    height: 200,
+                    height: 250,
                     autoPlay: true,
                     autoPlayInterval: const Duration(seconds: 5),
                     autoPlayAnimationDuration:
@@ -426,52 +426,29 @@ class _UserDashboardState extends State<UserDashboard> {
                   items: imageUrls.map((imageUrl) {
                     return Container(
                       width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withAlpha(25),
-                            spreadRadius: 1,
-                            blurRadius: 10,
+                      color: Colors.black,
+                      child: AspectRatio(
+                        aspectRatio:
+                            1041 / 736, // matches your image aspect ratio
+                        child: CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          fit: BoxFit.contain, // prevents cropping
+                          alignment: Alignment.center,
+                          placeholder: (context, url) => Container(
+                            color: Colors.grey[300],
+                            child: const Center(
+                              child: CircularProgressIndicator(
+                                color: primaryColor,
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            CachedNetworkImage(
-                              imageUrl: imageUrl,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Container(
-                                color: Colors.grey[300],
-                                child: const Center(
-                                  child: CircularProgressIndicator(
-                                    color: primaryColor,
-                                  ),
-                                ),
-                              ),
-                              errorWidget: (context, url, error) => Container(
-                                color: Colors.grey[300],
-                                child: const Center(
-                                  child: Icon(Icons.error_outline,
-                                      color: Colors.red, size: 32),
-                                ),
-                              ),
+                          errorWidget: (context, url, error) => Container(
+                            color: Colors.grey[300],
+                            child: const Center(
+                              child: Icon(Icons.error_outline,
+                                  color: Colors.red, size: 32),
                             ),
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    Colors.transparent,
-                                    Colors.black.withAlpha(178),
-                                  ],
-                                  stops: const [0.6, 1.0],
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     );

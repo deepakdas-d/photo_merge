@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:photomerge/Admin/a_listimages.dart';
 import 'package:photomerge/Admin/add_posters.dart';
 import 'package:photomerge/Admin/categoreymanagment.dart';
@@ -181,15 +182,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   ),
                   style: TextStyle(color: Colors.white),
                 )
-              : Text(
-                  'Admin Dashboard',
-                  style: TextStyle(
-                    fontFamily: 'Roboto',
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
+              : Text('Admin Dashboard',
+                  style: GoogleFonts.oswald(
+                      color: Colors.white, fontWeight: FontWeight.bold)),
           backgroundColor: Colors.green[600],
           elevation: 0,
           centerTitle: true,
@@ -283,7 +278,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     fontFamily: 'Roboto',
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
-                    color: Colors.green[800],
+                    color: Colors.black,
                   ),
                 ),
                 SizedBox(height: 16),
@@ -381,7 +376,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 fontFamily: 'Roboto',
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.green[800],
+                color: Colors.black,
               ),
               textAlign: TextAlign.center,
               maxLines: 1,
@@ -413,7 +408,7 @@ class SubtitleWithAnimation extends StatefulWidget {
 class _SubtitleWithAnimationState extends State<SubtitleWithAnimation>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
@@ -422,7 +417,10 @@ class _SubtitleWithAnimationState extends State<SubtitleWithAnimation>
       duration: const Duration(seconds: 2),
       vsync: this,
     );
-    _fadeAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.5), // Start slightly below
+      end: const Offset(0, 0), // End at original position
+    ).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
     _controller.repeat(reverse: true);
@@ -436,15 +434,15 @@ class _SubtitleWithAnimationState extends State<SubtitleWithAnimation>
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _fadeAnimation,
+    return SlideTransition(
+      position: _slideAnimation,
       child: Text(
         widget.text,
         textAlign: TextAlign.center,
-        style: TextStyle(
+        style: const TextStyle(
           fontFamily: 'Roboto',
           fontSize: 12,
-          color: Colors.green[700],
+          color: Colors.black,
         ),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
