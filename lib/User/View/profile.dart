@@ -89,6 +89,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _loadUserData() async {
     setState(() => _isLoading = true);
     final currentUser = _firebaseAuth.currentUser;
+
     if (currentUser == null) {
       setState(() => _isLoading = false);
       _showSnackBar('No user signed in', isError: true);
@@ -96,26 +97,39 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     try {
-      final doc = await _firestore
+      // Fetch from 'users' collection
+      final userDoc =
+          await _firestore.collection('users').doc(currentUser.uid).get();
+
+      // Fetch from 'user_profile' collection
+      final profileDoc = await _firestore
           .collection('user_profile')
           .doc(currentUser.uid)
           .get();
-      if (doc.exists && mounted) {
-        final data = doc.data()!;
-        _firstNameController.text = data['firstName'] ?? '';
-        _lastNameController.text = data['lastName'] ?? '';
-        _emailController.text = data['email'] ?? '';
-        _phoneController.text = data['phone1'] ?? '';
-        _companyNameController.text = data['companyName'] ?? '';
-        _designationController.text = data['designation'] ?? '';
-        _websiteController.text = data['companyWebsite'] ?? '';
-        _districtController.text = data['district'] ?? '';
-        _branchController.text = data['branch'] ?? '';
-        _userImageUrl = data['userImage'];
-        _companyLogoUrl = data['companyLogo'];
+
+      if (mounted) {
+        // From 'users' collection
+        if (userDoc.exists) {
+          final userData = userDoc.data()!;
+          _emailController.text = userData['email'] ?? '';
+          _phoneController.text = userData['phone'] ?? '';
+        }
+
+        // From 'user_profile' collection
+        if (profileDoc.exists) {
+          final profileData = profileDoc.data()!;
+          _firstNameController.text = profileData['firstName'] ?? '';
+          _lastNameController.text = profileData['lastName'] ?? '';
+          _companyNameController.text = profileData['companyName'] ?? '';
+          _designationController.text = profileData['designation'] ?? '';
+          _websiteController.text = profileData['companyWebsite'] ?? '';
+          _districtController.text = profileData['district'] ?? '';
+          _branchController.text = profileData['branch'] ?? '';
+          _userImageUrl = profileData['userImage'];
+          _companyLogoUrl = profileData['companyLogo'];
+        }
+
         setState(() => _isEditing = false);
-      } else {
-        setState(() => _isEditing = true);
       }
     } catch (e) {
       _showSnackBar('Error loading profile: $e', isError: true);
@@ -262,7 +276,7 @@ class _ProfilePageState extends State<ProfilePage> {
         'firstName': _firstNameController.text.trim(),
         'lastName': _lastNameController.text.trim(),
         'email': _emailController.text.trim(),
-        'phone1': _phoneController.text.trim(),
+        'phone': _phoneController.text.trim(),
         'companyName': _companyNameController.text.trim(),
         'designation': _designationController.text.trim(),
         'companyWebsite': _websiteController.text.trim(),
@@ -392,6 +406,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                         _emailController,
                                         type: TextInputType.emailAddress,
                                         semanticLabel: 'Email Address',
+                                        overrideEnabled:
+                                            false, // make read-only
                                       ),
                                       _buildTextField(
                                         'Phone',
@@ -399,6 +415,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                         _phoneController,
                                         type: TextInputType.phone,
                                         semanticLabel: 'Phone Number',
+                                        overrideEnabled:
+                                            false, // make read-only
                                       ),
                                     ],
                                   ),
@@ -619,13 +637,16 @@ class _ProfilePageState extends State<ProfilePage> {
     TextEditingController controller, {
     TextInputType type = TextInputType.text,
     String? semanticLabel,
+    bool? overrideEnabled,
   }) {
+    final isFieldEnabled = overrideEnabled ?? _isEditing;
+
     return Semantics(
       label: semanticLabel ?? label,
       child: TextFormField(
         controller: controller,
         keyboardType: type,
-        enabled: _isEditing,
+        enabled: isFieldEnabled,
         style: TextStyle(
           color: textColor,
           fontSize: 16,
@@ -634,7 +655,7 @@ class _ProfilePageState extends State<ProfilePage> {
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: Icon(icon, color: primaryColor, size: 20),
-          suffixIcon: _isEditing && controller.text.isNotEmpty
+          suffixIcon: isFieldEnabled && controller.text.isNotEmpty
               ? IconButton(
                   icon: Icon(Icons.clear, color: textSecondaryColor, size: 20),
                   onPressed: () => controller.clear(),
@@ -643,6 +664,7 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         validator: (value) {
           if (value?.trim().isEmpty ?? true) return '$label is required';
+
           if (type == TextInputType.emailAddress &&
               !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value!)) {
             return 'Enter a valid email';

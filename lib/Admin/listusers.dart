@@ -68,41 +68,36 @@ class _UserListPageState extends State<UserListPage> {
               pw.SizedBox(height: 20),
               pw.Divider(),
               pw.SizedBox(height: 20),
-              _buildPdfRow('User ID', userId),
+              _buildPdfRow(
+                'Name',
+                '${profileData?['firstName'] ?? ''} ${profileData?['lastName'] ?? ''}'
+                        .trim()
+                        .isNotEmpty
+                    ? '${profileData?['firstName'] ?? ''} ${profileData?['lastName'] ?? ''}'
+                        .trim()
+                    : 'Not provided',
+              ),
               _buildPdfRow('Email', userData['email'] ?? 'Not provided'),
+              _buildPdfRow('Phone', userData['phone'] ?? 'Not provided'),
               _buildPdfRow('Role', userData['role'] ?? 'Not provided'),
-              _buildPdfRow('Status',
-                  userData['isActive'] == true ? 'Active' : 'Inactive'),
-              if (userData['displayName'] != null)
-                _buildPdfRow('Name', userData['displayName']),
-              if (userData['phoneNumber'] != null)
-                _buildPdfRow('Phone', userData['phoneNumber']),
-              if (userData['createdAt'] != null)
+              if (profileData != null) ...[
                 _buildPdfRow(
                     'Created', _formatTimestamp(userData['createdAt'])),
-              if (profileData != null) ...[
-                pw.SizedBox(height: 20),
-                pw.Text('Profile Details',
-                    style: pw.TextStyle(
-                        fontSize: 18, fontWeight: pw.FontWeight.bold)),
-                pw.SizedBox(height: 10),
-                _buildPdfRow('First Name', profileData['firstName'] ?? ''),
-                _buildPdfRow('Last Name', profileData['lastName'] ?? ''),
-                _buildPdfRow('Gender', profileData['gender'] ?? ''),
-                _buildPdfRow('Phone', profileData['phone1'] ?? ''),
-                _buildPdfRow('Company Name', profileData['companyName'] ?? ''),
-                _buildPdfRow('Designation', profileData['designation'] ?? ''),
-                _buildPdfRow('Website', profileData['companyWebsite'] ?? ''),
-                if (profileData['dob'] != null)
-                  _buildPdfRow('DOB', _formatTimestamp(profileData['dob'])),
+                _buildPdfRow(
+                    'Company', profileData['companyName'] ?? 'Not provided'),
+                _buildPdfRow('Designation',
+                    profileData['designation'] ?? 'Not provided'),
+                _buildPdfRow(
+                    'Website', profileData['companyWebsite'] ?? 'Not provided'),
               ],
               pw.SizedBox(height: 30),
               pw.Text(
-                'This document was generated on ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now())}',
+                'Generated on ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now())}',
                 style: pw.TextStyle(
-                    fontSize: 10,
-                    fontStyle: pw.FontStyle.italic,
-                    color: PdfColors.grey),
+                  fontSize: 10,
+                  fontStyle: pw.FontStyle.italic,
+                  color: PdfColors.grey,
+                ),
               ),
             ],
           );
@@ -111,8 +106,10 @@ class _UserListPageState extends State<UserListPage> {
     );
 
     final output = await getTemporaryDirectory();
-    final fileName =
-        'user_${userId}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+    final displayName = (userData['firstName'] ?? 'user').toString().trim();
+    final safeName = displayName.replaceAll(
+        RegExp(r'\s+'), '_'); // Replace spaces with underscores
+    final fileName = '${safeName}_details.pdf';
     final file = File('${output.path}/$fileName');
     await file.writeAsBytes(await pdf.save());
     return file;
@@ -127,15 +124,13 @@ class _UserListPageState extends State<UserListPage> {
 
   pw.Widget _buildPdfRow(String title, String value) {
     return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 5),
+      padding: const pw.EdgeInsets.symmetric(vertical: 4),
       child: pw.Row(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.SizedBox(
-            width: 120,
-            child: pw.Text('$title:',
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-          ),
+          pw.Container(
+              width: 120,
+              child: pw.Text('$title:',
+                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold))),
           pw.Expanded(child: pw.Text(value)),
         ],
       ),
@@ -169,6 +164,7 @@ class _UserListPageState extends State<UserListPage> {
   Future<void> _downloadUserDetails(BuildContext context,
       Map<String, dynamic> userData, String userId) async {
     try {
+      // Show loading dialog
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -183,29 +179,73 @@ class _UserListPageState extends State<UserListPage> {
         ),
       );
 
+      // Generate the PDF
       final tempPdfFile = await _generatePdf(userData, userId);
 
-      Map<Permission, PermissionStatus> statuses = await [
+      // Request permissions
+      final statuses = await [
         Permission.storage,
-        Permission.manageExternalStorage,
+        if (Platform.isAndroid) Permission.manageExternalStorage,
       ].request();
 
-      bool isGranted = statuses[Permission.storage]?.isGranted == true ||
-          statuses[Permission.manageExternalStorage]?.isGranted == true;
+      final isStorageGranted = statuses[Permission.storage]?.isGranted ==
+              true ||
+          (Platform.isAndroid &&
+              statuses[Permission.manageExternalStorage]?.isGranted == true);
 
-      File finalPdfFile = tempPdfFile;
+      File finalPdfFile;
 
-      if (isGranted) {
+      if (isStorageGranted) {
+        // Save to Downloads
         finalPdfFile = await _savePdfToDownloads(tempPdfFile, userId);
+        await tempPdfFile.delete(); // Clean up temp file
+        print('PDF saved to: ${finalPdfFile.path}');
+      } else {
+        // Permission denied, use temp file
+        finalPdfFile = tempPdfFile;
+        print('Storage permission denied. Using temporary file.');
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'Storage permission denied. PDF will not be saved to Downloads.'),
+            ),
+          );
+        }
       }
 
-      if (context.mounted) Navigator.of(context).pop();
-      await OpenFile.open(finalPdfFile.path);
-    } catch (e) {
+      // Close the loading dialog
       if (context.mounted && Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error generating PDF: $e')));
+      }
+
+      // Open the PDF
+      final result = await OpenFile.open(finalPdfFile.path);
+      if (result.type != ResultType.done && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error opening PDF: ${result.message}')),
+        );
+      }
+
+      // Notify user of save success
+      if (isStorageGranted && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text('PDF saved to Downloads folder: ${finalPdfFile.path}'),
+          ),
+        );
+      }
+    } catch (e) {
+      // Handle errors
+      print('Error generating or saving PDF: $e');
+      if (context.mounted && Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error generating or saving PDF: $e')),
+        );
       }
     }
   }
@@ -232,7 +272,7 @@ class _UserListPageState extends State<UserListPage> {
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
             onPressed: _refreshUserList,
-          )
+          ),
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -267,7 +307,7 @@ class _UserListPageState extends State<UserListPage> {
                 child: ListTile(
                   leading: CircleAvatar(
                     backgroundColor: Colors.green.withOpacity(0.1),
-                    child: Icon(Icons.person, color: Colors.green),
+                    child: const Icon(Icons.person, color: Colors.green),
                   ),
                   title: Row(
                     children: [

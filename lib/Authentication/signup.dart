@@ -52,7 +52,7 @@ class _SignupPageState extends State<SignupPage> {
     });
 
     try {
-      // 🔍 Check for duplicate phone number
+      //  Check for duplicate phone number
       final phoneCheck = await FirebaseFirestore.instance
           .collection('users')
           .where('phone', isEqualTo: phone)
@@ -67,14 +67,14 @@ class _SignupPageState extends State<SignupPage> {
         return;
       }
 
-      // 👤 Create user with Firebase Auth
+      //  Create user with Firebase Auth
       UserCredential userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // 📄 Store user info in Firestore
+      //  Store user info in Firestore
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userCredential.user!.uid)

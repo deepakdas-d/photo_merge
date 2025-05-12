@@ -637,16 +637,16 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
       case 'Expired':
         final now = Timestamp.now();
         query = query
-            .where('subscriptionExpiry', isLessThan: now)
-            .orderBy('subscriptionExpiry', descending: true);
+            .where('isSubscribed', isEqualTo: false)
+            .where('subscriptionExpiry', isLessThan: now);
         break;
       case 'Never Subscribed':
-        query = query
-            .where('freeDownloadUsed', isEqualTo: true)
-            .where('isSubscribed', isEqualTo: false);
+        query = query.where('subscriptionPlan', isEqualTo: '');
         break;
-      default: // 'All'
-        query = query.orderBy('lastSubscriptionUpdate', descending: true);
+      case 'All':
+      default:
+        // No filter applied
+        break;
     }
 
     return query;
