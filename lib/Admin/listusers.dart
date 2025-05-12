@@ -286,7 +286,10 @@ class _UserListPageState extends State<UserListPage> {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
 
-          final users = snapshot.data!.docs;
+          final users = snapshot.data!.docs.where((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return data['role'] != 'admin'; // Exclude admins
+          }).toList();
 
           if (users.isEmpty) {
             return const Center(child: Text('No users found.'));

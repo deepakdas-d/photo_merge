@@ -46,13 +46,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
             MaterialPageRoute(builder: (context) => ListImagesPage()),
           )
     },
-    {
-      'icon': Icons.person_add,
-      'title': 'Add Admin',
-      'subtitle': 'Create a new admin account.',
-      'onTap': (BuildContext context) =>
-          Navigator.pushNamed(context, '/createadmin')
-    },
+    // {
+    //   'icon': Icons.person_add,
+    //   'title': 'Add Admin',
+    //   'subtitle': 'Create a new admin account.',
+    //   'onTap': (BuildContext context) =>
+    //       Navigator.pushNamed(context, '/createadmin')
+    // },
     {
       'icon': Icons.person_add,
       'title': 'List Users',
