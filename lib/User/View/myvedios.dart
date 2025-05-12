@@ -368,10 +368,19 @@ class VideoCard extends StatelessWidget {
   Future<void> _launchVideo(BuildContext context, String videoUrl) async {
     try {
       final uri = Uri.parse(videoUrl);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        _showErrorSnackBar(context, 'Could not open video link');
+
+      // Try external application first
+      final success =
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+
+      // If it failed, fallback to in-app webview
+      if (!success) {
+        final fallbackSuccess =
+            await launchUrl(uri, mode: LaunchMode.inAppWebView);
+
+        if (!fallbackSuccess) {
+          _showErrorSnackBar(context, 'Could not open video link');
+        }
       }
     } catch (e) {
       _showErrorSnackBar(context, 'Invalid video link');

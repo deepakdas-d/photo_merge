@@ -1037,9 +1037,11 @@ class _UserDashboardState extends State<UserDashboard> {
                     return GestureDetector(
                       onTap: () async {
                         final uri = Uri.parse(videoUrl);
+
                         if (await canLaunchUrl(uri)) {
                           await launchUrl(uri,
                               mode: LaunchMode.externalApplication);
+                          print('link$uri');
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Cannot open video')),

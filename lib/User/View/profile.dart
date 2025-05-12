@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:photomerge/User/View/home.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -21,26 +20,27 @@ class _ProfilePageState extends State<ProfilePage> {
   final _firestore = FirebaseFirestore.instance;
   final _formKey = GlobalKey<FormState>();
 
-  // Modern color palette
-  static const Color primaryColor = Color(0xFF4CAF50);
-  static const Color backgroundColor = Color(0xFFF8FAFC);
+  // Enhanced color palette
+  static const Color primaryColor = Color(0xFF2E7D32);
+  static const Color accentColor = Color(0xFF81C784);
+  static const Color backgroundColor = Color(0xFFF5F7FA);
   static const Color cardColor = Colors.white;
-  static const Color textColor = Color(0xFF1A1A1A);
-  static const Color textSecondaryColor = Color(0xFF6B7280);
-  static const Color dividerColor = Color(0xFFE5E7EB);
-  static const Color errorColor = Color(0xFFDC2626);
-  static const Color successColor = Color(0xFF16A34A);
+  static const Color textColor = Color(0xFF1E293B);
+  static const Color textSecondaryColor = Color(0xFF64748B);
+  static const Color dividerColor = Color(0xFFE2E8F0);
+  static const Color errorColor = Color(0xFFB91C1C);
+  static const Color successColor = Color(0xFF15803D);
 
   // Controllers
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
-  late TextEditingController _dobController;
   late TextEditingController _companyNameController;
   late TextEditingController _designationController;
-  late TextEditingController _websitecontroller;
-  String _selectedGender = 'Male';
+  late TextEditingController _websiteController;
+  late TextEditingController _districtController;
+  late TextEditingController _branchController;
 
   // Image state
   File? _userImage;
@@ -52,9 +52,6 @@ class _ProfilePageState extends State<ProfilePage> {
   bool _isLoading = true;
   bool _isEditing = false;
   bool _isSaving = false;
-  DateTime? _selectedDate;
-
-  static const List<String> _genderOptions = ['Male', 'Female', 'Other'];
 
   @override
   void initState() {
@@ -68,10 +65,11 @@ class _ProfilePageState extends State<ProfilePage> {
     _lastNameController = TextEditingController();
     _emailController = TextEditingController();
     _phoneController = TextEditingController();
-    _dobController = TextEditingController();
     _companyNameController = TextEditingController();
     _designationController = TextEditingController();
-    _websitecontroller = TextEditingController();
+    _websiteController = TextEditingController();
+    _districtController = TextEditingController();
+    _branchController = TextEditingController();
   }
 
   @override
@@ -80,10 +78,11 @@ class _ProfilePageState extends State<ProfilePage> {
     _lastNameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
-    _dobController.dispose();
     _companyNameController.dispose();
     _designationController.dispose();
-    _websitecontroller.dispose();
+    _websiteController.dispose();
+    _districtController.dispose();
+    _branchController.dispose();
     super.dispose();
   }
 
@@ -107,14 +106,11 @@ class _ProfilePageState extends State<ProfilePage> {
         _lastNameController.text = data['lastName'] ?? '';
         _emailController.text = data['email'] ?? '';
         _phoneController.text = data['phone1'] ?? '';
-        _selectedGender = data['gender'] ?? 'Male';
-        if (data['dob'] != null) {
-          _selectedDate = (data['dob'] as Timestamp).toDate();
-          _dobController.text = DateFormat('MM/dd/yyyy').format(_selectedDate!);
-        }
         _companyNameController.text = data['companyName'] ?? '';
         _designationController.text = data['designation'] ?? '';
-        _websitecontroller.text = data['companyWebsite'] ?? '';
+        _websiteController.text = data['companyWebsite'] ?? '';
+        _districtController.text = data['district'] ?? '';
+        _branchController.text = data['branch'] ?? '';
         _userImageUrl = data['userImage'];
         _companyLogoUrl = data['companyLogo'];
         setState(() => _isEditing = false);
@@ -137,7 +133,7 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         backgroundColor: isError ? errorColor : successColor,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
         duration: const Duration(seconds: 3),
       ),
@@ -180,8 +176,8 @@ class _ProfilePageState extends State<ProfilePage> {
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -267,12 +263,11 @@ class _ProfilePageState extends State<ProfilePage> {
         'lastName': _lastNameController.text.trim(),
         'email': _emailController.text.trim(),
         'phone1': _phoneController.text.trim(),
-        'gender': _selectedGender,
-        'dob':
-            _selectedDate != null ? Timestamp.fromDate(_selectedDate!) : null,
         'companyName': _companyNameController.text.trim(),
         'designation': _designationController.text.trim(),
-        'companyWebsite': _websitecontroller.text.trim(),
+        'companyWebsite': _websiteController.text.trim(),
+        'district': _districtController.text.trim(),
+        'branch': _branchController.text.trim(),
         'userImage': _userImageUrl ?? '',
         'companyLogo': _companyLogoUrl ?? '',
         'updatedAt': FieldValue.serverTimestamp(),
@@ -284,8 +279,11 @@ class _ProfilePageState extends State<ProfilePage> {
           .set(data, SetOptions(merge: true));
 
       if (mounted) {
-        _showSnackBar('Profile updated successfully');
-        setState(() => _isEditing = false);
+        // _showSnackBar('Profile updated successfully');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const UserDashboard()),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -293,36 +291,6 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
-    }
-  }
-
-  Future<void> _selectDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-      builder: (context, child) => Theme(
-        data: ThemeData.light().copyWith(
-          colorScheme: ColorScheme.light(
-            primary: primaryColor,
-            onPrimary: Colors.white,
-            surface: cardColor,
-            onSurface: textColor,
-          ),
-          textTheme: ThemeData.light().textTheme.copyWith(
-                bodyMedium: TextStyle(color: textColor),
-              ),
-        ),
-        child: child!,
-      ),
-    );
-
-    if (picked != null && mounted) {
-      setState(() {
-        _selectedDate = picked;
-        _dobController.text = DateFormat('MM/dd/yyyy').format(picked);
-      });
     }
   }
 
@@ -341,18 +309,18 @@ class _ProfilePageState extends State<ProfilePage> {
           filled: true,
           fillColor: Colors.white,
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: dividerColor.withOpacity(0.5)),
+            borderSide: BorderSide(color: dividerColor.withOpacity(0.3)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: primaryColor, width: 1.5),
+            borderSide: const BorderSide(color: primaryColor, width: 2),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -360,7 +328,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           focusedErrorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: errorColor, width: 1.5),
+            borderSide: const BorderSide(color: errorColor, width: 2),
           ),
           labelStyle: TextStyle(color: textSecondaryColor, fontSize: 14),
           floatingLabelStyle: TextStyle(color: primaryColor, fontSize: 14),
@@ -374,6 +342,7 @@ class _ProfilePageState extends State<ProfilePage> {
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             elevation: 0,
+            shadowColor: Colors.black.withOpacity(0.2),
             textStyle: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -431,8 +400,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                         type: TextInputType.phone,
                                         semanticLabel: 'Phone Number',
                                       ),
-                                      _buildDateField(),
-                                      _buildGenderDropdown(),
                                     ],
                                   ),
                                   const SizedBox(height: 24),
@@ -451,8 +418,25 @@ class _ProfilePageState extends State<ProfilePage> {
                                         _designationController,
                                         semanticLabel: 'Designation',
                                       ),
-                                      _buildTextField("Websiite", Icons.link,
-                                          _websitecontroller),
+                                      _buildTextField(
+                                        'District',
+                                        Icons.location_city,
+                                        _districtController,
+                                        semanticLabel: 'District',
+                                      ),
+                                      _buildTextField(
+                                        'Branch',
+                                        Icons.store,
+                                        _branchController,
+                                        semanticLabel: 'Branch',
+                                      ),
+                                      _buildTextField(
+                                        'Website',
+                                        Icons.link,
+                                        _websiteController,
+                                        type: TextInputType.url,
+                                        semanticLabel: 'Company Website',
+                                      ),
                                       _buildCompanyLogo(),
                                     ],
                                   ),
@@ -477,8 +461,8 @@ class _ProfilePageState extends State<ProfilePage> {
       title: Text(
         'My Profile',
         style: GoogleFonts.oswald(
-          color: Colors.green,
-          fontSize: 25,
+          color: primaryColor,
+          fontSize: 26,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -488,7 +472,7 @@ class _ProfilePageState extends State<ProfilePage> {
           IconButton(
             icon: Icon(
               _isEditing ? Icons.check : Icons.edit_outlined,
-              color: Colors.green,
+              color: primaryColor,
               size: 24,
             ),
             onPressed: _isEditing
@@ -497,19 +481,6 @@ class _ProfilePageState extends State<ProfilePage> {
             tooltip: _isEditing ? 'Save Profile' : 'Edit Profile',
           ),
       ],
-      leading: IconButton(
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => UserDashboard(),
-              ));
-        },
-        icon: Icon(
-          Icons.arrow_back,
-        ),
-        color: Colors.green,
-      ),
     );
   }
 
@@ -518,15 +489,15 @@ class _ProfilePageState extends State<ProfilePage> {
         '${_firstNameController.text} ${_lastNameController.text}'.trim();
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -539,8 +510,8 @@ class _ProfilePageState extends State<ProfilePage> {
               Semantics(
                 label: 'Profile Image',
                 child: CircleAvatar(
-                  radius: 50,
-                  backgroundColor: dividerColor,
+                  radius: 56,
+                  backgroundColor: dividerColor.withOpacity(0.2),
                   backgroundImage: _userImage != null
                       ? FileImage(_userImage!)
                       : _userImageUrl?.isNotEmpty ?? false
@@ -549,7 +520,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: _userImage == null && (_userImageUrl?.isEmpty ?? true)
                       ? Icon(
                           Icons.person,
-                          size: 50,
+                          size: 56,
                           color: textSecondaryColor,
                         )
                       : null,
@@ -566,12 +537,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       decoration: BoxDecoration(
                         color: primaryColor,
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
+                        border: Border.all(color: Colors.white, width: 2.5),
                       ),
                       child: const Icon(
                         Icons.camera_alt,
                         color: Colors.white,
-                        size: 16,
+                        size: 18,
                       ),
                     ),
                   ),
@@ -581,9 +552,9 @@ class _ProfilePageState extends State<ProfilePage> {
           const SizedBox(height: 16),
           Text(
             fullName.isEmpty ? 'Complete Your Profile' : fullName,
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
               color: textColor,
             ),
             textAlign: TextAlign.center,
@@ -594,7 +565,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ? 'Add your email'
                 : _emailController.text,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 15,
               color: textSecondaryColor,
             ),
             textAlign: TextAlign.center,
@@ -607,15 +578,15 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildInfoCard(String title, List<Widget> children) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -624,8 +595,8 @@ class _ProfilePageState extends State<ProfilePage> {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 18,
+            style: TextStyle(
+              fontSize: 20,
               fontWeight: FontWeight.w600,
               color: textColor,
             ),
@@ -650,13 +621,12 @@ class _ProfilePageState extends State<ProfilePage> {
     String? semanticLabel,
   }) {
     return Semantics(
-      label: semanticLabel ??
-          label, // Use provided semanticLabel or fallback to label
+      label: semanticLabel ?? label,
       child: TextFormField(
         controller: controller,
         keyboardType: type,
         enabled: _isEditing,
-        style: const TextStyle(
+        style: TextStyle(
           color: textColor,
           fontSize: 16,
           fontWeight: FontWeight.w400,
@@ -681,63 +651,14 @@ class _ProfilePageState extends State<ProfilePage> {
               !RegExp(r'^\+?[\d\s-]{10,}$').hasMatch(value!)) {
             return 'Enter a valid phone number';
           }
+          if (type == TextInputType.url &&
+              !RegExp(r'^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?$')
+                  .hasMatch(value!)) {
+            return 'Enter a valid URL';
+          }
           return null;
         },
       ),
-    );
-  }
-
-  Widget _buildDateField() {
-    return TextFormField(
-      controller: _dobController,
-      readOnly: true,
-      style: const TextStyle(
-        color: textColor,
-        fontSize: 16,
-        fontWeight: FontWeight.w400,
-      ),
-      decoration: InputDecoration(
-        labelText: 'Date of Birth',
-        prefixIcon: Icon(Icons.calendar_today, color: primaryColor, size: 20),
-        suffixIcon: _isEditing
-            ? IconButton(
-                icon: Icon(Icons.edit_calendar, color: primaryColor, size: 20),
-                onPressed: _selectDate,
-              )
-            : null,
-      ),
-      onTap: _isEditing ? _selectDate : null,
-      validator: (value) =>
-          value?.isEmpty ?? true ? 'Date of Birth is required' : null,
-    );
-  }
-
-  Widget _buildGenderDropdown() {
-    return DropdownButtonFormField<String>(
-      value: _selectedGender,
-      decoration: InputDecoration(
-        labelText: 'Gender',
-        prefixIcon: Icon(Icons.person_outline, color: primaryColor, size: 20),
-      ),
-      items: _genderOptions.map((value) {
-        return DropdownMenuItem(
-          value: value,
-          child: Text(
-            value,
-            style: const TextStyle(
-              color: textColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        );
-      }).toList(),
-      onChanged: _isEditing
-          ? (value) => setState(() => _selectedGender = value!)
-          : null,
-      dropdownColor: cardColor,
-      icon: Icon(Icons.arrow_drop_down, color: primaryColor),
-      validator: (value) => value == null ? 'Gender is required' : null,
     );
   }
 
