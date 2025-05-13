@@ -22,13 +22,13 @@ class _UserListPageState extends State<UserListPage> {
     setState(() {});
   }
 
-  Future<void> _toggleUserStatus(String docId, bool currentStatus) async {
+  Future<void> _setUserStatus(String docId, bool newStatus) async {
     try {
       await FirebaseFirestore.instance.collection('users').doc(docId).update({
-        'isActive': !currentStatus,
+        'isActive': newStatus,
       });
     } catch (e) {
-      print('Error toggling user status: $e');
+      print('Error setting user status: $e');
     }
   }
 
@@ -286,8 +286,11 @@ class _UserListPageState extends State<UserListPage> {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
 
+          // final users = snapshot.data!.docs; // this is for all the account
+
           final users = snapshot.data!.docs.where((doc) {
-            final data = doc.data() as Map<String, dynamic>;
+            final data =
+                doc.data() as Map<String, dynamic>; //this for admin filtering
             return data['role'] != 'admin'; // Exclude admins
           }).toList();
 
@@ -340,7 +343,7 @@ class _UserListPageState extends State<UserListPage> {
                         value: isActive,
                         activeColor: Colors.green,
                         onChanged: (newValue) =>
-                            _toggleUserStatus(docId, isActive),
+                            _setUserStatus(docId, newValue),
                       ),
                     ],
                   ),

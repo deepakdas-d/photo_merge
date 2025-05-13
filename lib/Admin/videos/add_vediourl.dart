@@ -14,7 +14,18 @@ class _AddVediourlState extends State<AddVediourl> {
   final _nameController = TextEditingController();
   final _firebaseAuth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
+  String? _selectedCategory; // Store selected category
   bool _isLoading = false;
+
+  // List of categories for the dropdown
+  final List<String> _categories = [
+    'Tutorial',
+    'Entertainment',
+    'Vlog',
+    'Gaming',
+    'Music',
+    'Other',
+  ];
 
   // Regular expression for validating YouTube URLs
   final _youtubeUrlPattern = RegExp(
@@ -32,6 +43,7 @@ class _AddVediourlState extends State<AddVediourl> {
   Future<void> _submitUrl() async {
     final url = _urlController.text.trim();
     final name = _nameController.text.trim();
+    final category = _selectedCategory;
 
     // Validate inputs
     if (name.isEmpty) {
@@ -55,6 +67,13 @@ class _AddVediourlState extends State<AddVediourl> {
       return;
     }
 
+    if (category == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a category')),
+      );
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -65,10 +84,11 @@ class _AddVediourlState extends State<AddVediourl> {
         throw Exception('No user signed in');
       }
 
-      // Store URL and name in Firestore
+      // Store URL, name, category, and userId in Firestore
       await _firestore.collection('videos').add({
         'url': url,
         'name': name,
+        'category': category,
         'userId': currentUser.uid,
         'timestamp': FieldValue.serverTimestamp(),
       });
@@ -78,6 +98,9 @@ class _AddVediourlState extends State<AddVediourl> {
       );
       _urlController.clear();
       _nameController.clear();
+      setState(() {
+        _selectedCategory = null; // Reset category
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error adding video: $e')),
@@ -119,6 +142,13 @@ class _AddVediourlState extends State<AddVediourl> {
             color: Colors.white,
           ),
         ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/adminlistvedio');
+              },
+              icon: Icon(Icons.list))
+        ],
         backgroundColor: const Color(0xFF4CAF50),
       ),
       body: Padding(
@@ -156,6 +186,28 @@ class _AddVediourlState extends State<AddVediourl> {
               ),
               keyboardType: TextInputType.url,
             ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              value: _selectedCategory,
+              decoration: InputDecoration(
+                labelText: 'Category',
+                border: const OutlineInputBorder(),
+                prefixIcon:
+                    const Icon(Icons.category, color: Color(0xFF4CAF50)),
+              ),
+              hint: const Text('Select a category'),
+              items: _categories.map((category) {
+                return DropdownMenuItem(
+                  value: category,
+                  child: Text(category),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedCategory = value;
+                });
+              },
+            ),
             const SizedBox(height: 16),
             _isLoading
                 ? const Center(
@@ -177,7 +229,7 @@ class _AddVediourlState extends State<AddVediourl> {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ),
+                  )
           ],
         ),
       ),

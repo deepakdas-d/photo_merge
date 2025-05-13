@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:photomerge/Admin/list_admincategorys.dart';
+import 'package:photomerge/Admin/categories/list_admincategorys.dart';
 import 'dart:convert';
 
 class CategoryManagementPage extends StatefulWidget {

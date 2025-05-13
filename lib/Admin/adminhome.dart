@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:photomerge/Admin/a_listimages.dart';
-import 'package:photomerge/Admin/add_posters.dart';
-import 'package:photomerge/Admin/categoreymanagment.dart';
+import 'package:photomerge/Admin/image_/a_listimages.dart';
+import 'package:photomerge/Admin/image_/add_posters.dart';
+import 'package:photomerge/Admin/categories/categoreymanagment.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({Key? key}) : super(key: key);

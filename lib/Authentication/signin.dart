@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
 
         if (querySnapshot.docs.isEmpty) {
           setState(() {
-            _error = 'No user found with this phone number';
+            _error = 'No user found with this phone number or email';
           });
           return;
         }
