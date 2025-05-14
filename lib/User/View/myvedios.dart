@@ -6,6 +6,11 @@ import 'package:google_fonts/google_fonts.dart';
 // import 'package:photomerge/User/View/home.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+// Add these imports at the top of your file
+// import 'package:audio_service/audio_service';
+// OR for a simpler approach, just add:
+import 'package:just_audio_background/just_audio_background.dart';
+import 'package:flutter/services.dart';
 
 class AllVideosPage extends StatefulWidget {
   const AllVideosPage({super.key});
@@ -801,14 +806,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     _controller.seekTo(Duration(seconds: currentPosition + 10));
   }
 
-  void _togglePlayPause() {
-    if (_controller.value.isPlaying) {
-      _controller.pause();
-    } else {
-      _controller.play();
-    }
-    setState(() {});
-  }
+  // void _togglePlayPause() {
+  //   if (_controller.value.isPlaying) {
+  //     _controller.pause();
+  //   } else {
+  //     _controller.play();
+  //   }
+  //   setState(() {});
+  // }
 
   void _changeQuality(String quality) {
     // Save current position before changing quality

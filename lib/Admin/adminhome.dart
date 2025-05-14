@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -103,10 +104,30 @@ class _AdminDashboardState extends State<AdminDashboard> {
     }
   }
 
+  Future<void> logout() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .update({
+          'isLoggedIn': false,
+          'deviceId': '',
+        });
+      }
+      await FirebaseAuth.instance.signOut();
+    } catch (e) {
+      print('Error during logout: $e');
+    }
+  }
+
   Future<void> _signOut() async {
     try {
-      await _firebaseAuth.signOut();
-      Navigator.pushReplacementNamed(context, '/login');
+      await logout(); // This handles Firestore update and sign out
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/login');
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error signing out: $e')),
@@ -157,82 +178,103 @@ class _AdminDashboardState extends State<AdminDashboard> {
       },
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          leading: IconButton(
-            onPressed: () {
-              setState(() {
-                _isSearching = !_isSearching;
-                if (!_isSearching) {
-                  _searchController.clear();
-                  _filteredActions = _allActions;
-                }
-              });
-            },
-            icon: Icon(Icons.search, color: Colors.white),
-          ),
-          title: _isSearching
-              ? TextField(
-                  controller: _searchController,
-                  autofocus: true,
-                  onChanged: _filterSearch,
-                  decoration: InputDecoration(
-                    hintText: 'Search actions...',
-                    hintStyle: TextStyle(color: Colors.white70),
-                    border: InputBorder.none,
-                  ),
-                  style: TextStyle(color: Colors.white),
-                )
-              : Text('Admin Dashboard',
-                  style: GoogleFonts.oswald(
-                      color: Colors.white, fontWeight: FontWeight.bold)),
-          backgroundColor: Colors.green[600],
-          elevation: 0,
-          centerTitle: true,
-          actions: [
-            IconButton(
-              icon: Icon(Icons.logout, color: Colors.white),
-              tooltip: 'Sign Out',
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(60.0), // Adjust height as needed
+          child: ClipPath(
+            clipper: CurvedBottomClipper(),
+            child: Container(
+              color: Colors.green[600],
+              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+              child: SafeArea(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _isSearching = !_isSearching;
+                          if (!_isSearching) {
+                            _searchController.clear();
+                            _filteredActions = _allActions;
+                          }
+                        });
+                      },
+                      icon: Icon(Icons.search, color: Colors.white),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: _isSearching
+                            ? TextField(
+                                controller: _searchController,
+                                autofocus: true,
+                                onChanged: _filterSearch,
+                                decoration: InputDecoration(
+                                  hintText: 'Search actions...',
+                                  hintStyle: TextStyle(color: Colors.white70),
+                                  border: InputBorder.none,
+                                ),
+                                style: TextStyle(color: Colors.white),
+                              )
+                            : Text(
+                                'Admin Dashboard',
+                                style: GoogleFonts.oswald(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20),
+                              ),
                       ),
-                      title: Text(
-                        'Confirm Logout',
-                        style: TextStyle(
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      content: Text('Are you sure you want to log out?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text('Cancel',
-                              style: TextStyle(color: Colors.green[600])),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            _signOut();
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.logout, color: Colors.white),
+                      tooltip: 'Sign Out',
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              title: Text(
+                                'Confirm Logout',
+                                style: TextStyle(
+                                  fontFamily: 'Roboto',
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              content:
+                                  Text('Are you sure you want to log out?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: Text(
+                                    'Cancel',
+                                    style: TextStyle(color: Colors.green[600]),
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    _signOut();
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green[600],
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: Text('Logout'),
+                                ),
+                              ],
+                            );
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green[600],
-                            foregroundColor: Colors.white,
-                          ),
-                          child: Text('Logout'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ],
+          ),
         ),
         body: Container(
           decoration: BoxDecoration(
@@ -449,4 +491,41 @@ class _SubtitleWithAnimationState extends State<SubtitleWithAnimation>
       ),
     );
   }
+}
+
+class CurvedBottomClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    final width = size.width;
+    final height = size.height;
+
+    // Height of the arc curve
+    final arcHeight = 30.0;
+
+    // Start from top-left
+    path.moveTo(0, 0);
+
+    // Line to bottom-left
+    path.lineTo(0, height - arcHeight);
+
+    // Draw the perfect arc using quadraticBezierTo
+    path.quadraticBezierTo(
+      width / 2, // control point x
+      height + arcHeight, // control point y (below the bottom edge)
+      width, // end point x
+      height - arcHeight, // end point y
+    );
+
+    // Line to top-right
+    path.lineTo(width, 0);
+
+    // Close the path
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }

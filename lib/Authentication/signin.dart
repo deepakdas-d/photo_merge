@@ -1,9 +1,16 @@
+import 'dart:io';
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart'
+    as flutterSecureStorage;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:photomerge/main.dart';
+import 'package:uuid/uuid.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -65,6 +72,29 @@ class _LoginPageState extends State<LoginPage> {
         email = userData['email'];
       }
 
+      // Check if user is already logged in somewhere else
+      final userQuerySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      if (userQuerySnapshot.docs.isNotEmpty) {
+        final userData = userQuerySnapshot.docs.first.data();
+        final bool isLoggedInElsewhere = userData['isLoggedIn'] ?? false;
+        final String deviceId = userData['deviceId'] ?? '';
+        final String currentDeviceId =
+            await _getDeviceId(); // Implement this method to get unique device ID
+
+        // If user is logged in on another device
+        if (isLoggedInElsewhere && deviceId != currentDeviceId) {
+          setState(() {
+            _error = 'This account is already logged in on another device';
+          });
+          return;
+        }
+      }
+
       // Sign in with the resolved email
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -97,6 +127,17 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
+      // Update user's login status and device ID
+      final String deviceId = await _getDeviceId();
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .update({
+        'isLoggedIn': true,
+        'deviceId': deviceId,
+        'lastLoginAt': FieldValue.serverTimestamp(),
+      });
+
       // Success: Navigate to home/dashboard
       if (mounted) {
         Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
@@ -127,6 +168,61 @@ class _LoginPageState extends State<LoginPage> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+// Helper method to get device ID
+  Future<String> _getDeviceId() async {
+    // You need to add the device_info_plus package to your pubspec.yaml
+    // dependencies:
+    //   device_info_plus: ^4.0.0
+
+    try {
+      DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+
+      if (Platform.isAndroid) {
+        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+        return androidInfo.id; // Unique ID for Android
+      } else if (Platform.isIOS) {
+        IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+        return iosInfo.identifierForVendor!; // Unique ID for iOS
+      } else if (kIsWeb) {
+        // For web, we need to create a semi-persistent ID
+        // This is not as reliable but provides a basic implementation
+        const storage = flutterSecureStorage.FlutterSecureStorage();
+        String? deviceId = await storage.read(key: 'device_id');
+
+        if (deviceId == null) {
+          deviceId = Uuid().v4(); // Generate a UUID
+          await storage.write(key: 'device_id', value: deviceId);
+        }
+
+        return deviceId;
+      }
+
+      return 'unknown_device';
+    } catch (e) {
+      // Fallback to a random ID if device info cannot be retrieved
+      return DateTime.now().millisecondsSinceEpoch.toString();
+    }
+  }
+
+// Don't forget to add a logout method that clears the login status
+  Future<void> logout() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .update({
+          'isLoggedIn': false,
+          'deviceId': '',
+        });
+      }
+      await FirebaseAuth.instance.signOut();
+    } catch (e) {
+      print('Error during logout: $e');
     }
   }
 

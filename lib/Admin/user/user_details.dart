@@ -252,7 +252,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
             _buildProfileRow('Email', widget.profileData['email'], Icons.email),
             SizedBox(height: 15),
             _buildProfileRow(
-                'Phone', widget.profileData['phone1'] ?? 'N/A', Icons.phone),
+                'Phone', widget.profileData['phone'] ?? 'N/A', Icons.phone),
             SizedBox(height: 15),
             _buildProfileRow('Role', widget.userData['role'], Icons.work),
             SizedBox(height: 15),

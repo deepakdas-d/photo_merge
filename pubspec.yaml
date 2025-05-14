@@ -44,7 +44,7 @@ dependencies:
   firebase_storage: ^12.4.5
   url_launcher: ^6.3.1
   awesome_notifications: ^0.10.1
-  device_info_plus: ^11.3.0
+  device_info_plus: ^11.4.0
   carousel_slider: ^5.0.0
   shimmer: ^3.0.0
   share_plus: ^11.0.0
@@ -57,6 +57,11 @@ dependencies:
   flutter_staggered_animations: ^1.1.1
   youtube_player_flutter: ^9.1.1
   connectivity_plus: ^6.1.4
+  audio_service: ^0.18.18
+  just_audio_background: ^0.0.1-beta.17
+  just_audio: ^0.10.2
+  uuid: ^4.5.1
+  flutter_secure_storage: ^4.2.1
      
 
   
