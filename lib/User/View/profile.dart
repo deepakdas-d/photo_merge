@@ -476,6 +476,12 @@ class _ProfilePageState extends State<ProfilePage> {
       backgroundColor: Colors.white,
       elevation: 0,
       automaticallyImplyLeading: false,
+      leading: IconButton(
+          onPressed: () => Navigator.pushNamed(context, '/user'),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Colors.green,
+          )),
       title: Text(
         'My Profile',
         style: GoogleFonts.oswald(

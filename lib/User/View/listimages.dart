@@ -911,7 +911,7 @@ class _ImageDetailViewState extends State<ImageDetailView>
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       Text(
-                                        userData!['phone1'] ?? 'No Number',
+                                        userData!['phone'] ?? 'No Number',
                                         style: const TextStyle(
                                           fontSize: 12,
                                           color: Colors.white70,

@@ -16,6 +16,8 @@ class CategoryManagementPage extends StatefulWidget {
 }
 
 class _CategoryManagementPageState extends State<CategoryManagementPage> {
+  final _formKey = GlobalKey<FormState>();
+
   final _firebaseAuth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
   final _categoryController = TextEditingController();
@@ -162,43 +164,6 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
     }
   }
 
-  // Future<void> _deleteCategory(String docId) async {
-  //   final confirmed = await showDialog<bool>(
-  //     context: context,
-  //     builder: (context) => AlertDialog(
-  //       title: const Text('Delete Category'),
-  //       content: const Text(
-  //           'Are you sure you want to delete this category and its subcategories?'),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () => Navigator.pop(context, false),
-  //           child: const Text('Cancel'),
-  //         ),
-  //         TextButton(
-  //           onPressed: () => Navigator.pop(context, true),
-  //           child: const Text('Delete', style: TextStyle(color: Colors.red)),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-
-  //   if (confirmed != true) return;
-
-  //   setState(() => _isLoading = true);
-  //   try {
-  //     await _firestore.collection('categories').doc(docId).delete();
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text('Category deleted successfully')),
-  //     );
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Error deleting category: $e')),
-  //     );
-  //   } finally {
-  //     setState(() => _isLoading = false);
-  //   }
-  // }
-
   @override
   void dispose() {
     _categoryController.dispose();
@@ -251,258 +216,184 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
           ),
         ],
       ),
-      body: Container(
-        color: Colors.white,
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Add Category
-                    Text(
-                      'Add New Category',
-                      style: GoogleFonts.oswald(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _categoryController,
-                      decoration: InputDecoration(
-                        labelText: 'Category Name',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _selectedImage != null
-                              ? Image.file(
-                                  _selectedImage!,
-                                  height: 100,
-                                  width: 100,
-                                  fit: BoxFit.cover,
-                                )
-                              : Container(
-                                  height: 100,
-                                  width: 100,
-                                  color: Colors.grey[200],
-                                  child: Icon(Icons.image,
-                                      color: Colors.grey[600]),
-                                ),
+      body: SingleChildScrollView(
+        child: Container(
+          color: Colors.white,
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Add Category
+                      Text(
+                        'Add New Category',
+                        style: GoogleFonts.oswald(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
-                        const SizedBox(width: 8),
-                        ElevatedButton(
-                          onPressed: _pickImage,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
+                      ),
+                      const SizedBox(height: 8),
+                      Form(
+                        key: _formKey,
+                        child: Column(children: [
+                          TextFormField(
+                            controller: _categoryController,
+                            decoration: const InputDecoration(
+                              labelText: 'Category Name',
+                              border: OutlineInputBorder(),
+                            ),
+                            maxLength:
+                                15, // This visually restricts input length
                           ),
-                          child: const Text(
-                            'Pick Image',
-                            style: TextStyle(color: Colors.white),
+                        ]),
+                      ),
+
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _selectedImage != null
+                                ? Image.file(
+                                    _selectedImage!,
+                                    height: 100,
+                                    width: 100,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Container(
+                                    height: 100,
+                                    width: 100,
+                                    color: Colors.grey[200],
+                                    child: Icon(Icons.image,
+                                        color: Colors.grey[600]),
+                                  ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    ElevatedButton(
-                      onPressed: _addCategory,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                      ),
-                      child: const Text(
-                        'Add Category',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Add Subcategory
-                    Text(
-                      'Add Subcategory',
-                      style: GoogleFonts.oswald(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    StreamBuilder<QuerySnapshot>(
-                      stream: _firestore
-                          .collection('categories')
-                          .where('createdBy', isEqualTo: currentUser.uid)
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        }
-                        if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        }
-                        final categories = snapshot.data?.docs
-                                .map((doc) => doc['name'] as String)
-                                .toList() ??
-                            [];
-                        if (categories.isEmpty) {
-                          return const Text('No categories available');
-                        }
-                        return DropdownButtonFormField<String>(
-                          isExpanded: true,
-                          value: _selectedCategory,
-                          hint: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: _pickImage,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                            ),
                             child: const Text(
-                              'Select Category',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 16,
+                              'Pick Image',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: _addCategory,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                        ),
+                        child: const Text(
+                          'Add Category',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Add Subcategory
+                      Text(
+                        'Add Subcategory',
+                        style: GoogleFonts.oswald(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      StreamBuilder<QuerySnapshot>(
+                        stream: _firestore
+                            .collection('categories')
+                            .where('createdBy', isEqualTo: currentUser.uid)
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          }
+                          if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          }
+                          final categories = snapshot.data?.docs
+                                  .map((doc) => doc['name'] as String)
+                                  .toList() ??
+                              [];
+                          if (categories.isEmpty) {
+                            return const Text('No categories available');
+                          }
+                          return DropdownButtonFormField<String>(
+                            isExpanded: true,
+                            value: _selectedCategory,
+                            hint: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: const Text(
+                                'Select Category',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                ),
                               ),
                             ),
-                          ),
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide(color: Colors.grey),
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: Colors.grey),
+                              ),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
                             ),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
-                            ),
-                          ),
-                          items: categories
-                              .map((category) => DropdownMenuItem<String>(
-                                    value: category,
-                                    child: Text(
-                                      category,
-                                      style: TextStyle(color: Colors.black),
-                                    ),
-                                  ))
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedCategory = value;
-                              _subcategoryController.clear();
-                            });
-                          },
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: _subcategoryController,
-                      decoration: InputDecoration(
-                        labelText: 'Subcategory Name',
-                        border: OutlineInputBorder(),
+                            items: categories
+                                .map((category) => DropdownMenuItem<String>(
+                                      value: category,
+                                      child: Text(
+                                        category,
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                    ))
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedCategory = value;
+                                _subcategoryController.clear();
+                              });
+                            },
+                          );
+                        },
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    ElevatedButton(
-                      onPressed: _addSubcategory,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _subcategoryController,
+                        decoration: InputDecoration(
+                          labelText: 'Subcategory Name',
+                          border: OutlineInputBorder(),
+                        ),
+                        maxLength: 25,
                       ),
-                      child: const Text(
-                        'Add Subcategory',
-                        style: TextStyle(color: Colors.white),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: _addSubcategory,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                        ),
+                        child: const Text(
+                          'Add Subcategory',
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    // List Categories and Subcategories
-                    // Text(
-                    //   'Categories and Subcategories',
-                    //   style: GoogleFonts.oswald(
-                    //     fontSize: 18,
-                    //     fontWeight: FontWeight.bold,
-                    //     color: Colors.black,
-                    //   ),
-                    // ),
-                    // Expanded(
-                    //   child: StreamBuilder<QuerySnapshot>(
-                    //     stream: _firestore
-                    //         .collection('categories')
-                    //         .where('createdBy', isEqualTo: currentUser.uid)
-                    //         .snapshots(),
-                    //     builder: (context, snapshot) {
-                    //       if (snapshot.connectionState ==
-                    //           ConnectionState.waiting) {
-                    //         return const Center(
-                    //             child: CircularProgressIndicator());
-                    //       }
-                    //       if (snapshot.hasError) {
-                    //         return Text('Error: ${snapshot.error}');
-                    //       }
-                    //       if (!snapshot.hasData ||
-                    //           snapshot.data!.docs.isEmpty) {
-                    //         return const Center(
-                    //             child: Text('No categories found'));
-                    //       }
-                    //       return Scrollbar(
-                    //         controller: _scrollController,
-                    //         thumbVisibility: true,
-                    //         thickness: 6,
-                    //         radius: const Radius.circular(8),
-                    //         child: ListView.builder(
-                    //           controller: _scrollController,
-                    //           itemCount: snapshot.data!.docs.length,
-                    //           itemBuilder: (context, index) {
-                    //             final doc = snapshot.data!.docs[index];
-                    //             final categoryName = doc['name'] as String;
-                    //             final subcategories = List<String>.from(
-                    //                 doc['subcategories'] ?? []);
-
-                    //             return Card(
-                    //               elevation: 4,
-                    //               margin: const EdgeInsets.symmetric(
-                    //                   vertical: 8.0, horizontal: 16.0),
-                    //               shape: RoundedRectangleBorder(
-                    //                 borderRadius: BorderRadius.circular(12),
-                    //               ),
-                    //               child: Container(
-                    //                 decoration: BoxDecoration(
-                    //                   color: Colors.white,
-                    //                   borderRadius: BorderRadius.circular(12),
-                    //                 ),
-                    //                 padding: const EdgeInsets.all(12.0),
-                    //                 child: ListTile(
-                    //                   title: Text(
-                    //                     categoryName,
-                    //                     style: const TextStyle(
-                    //                       color: Colors.black,
-                    //                       fontWeight: FontWeight.bold,
-                    //                     ),
-                    //                   ),
-                    //                   subtitle: Text(
-                    //                     'Subcategories: ${subcategories.join(', ')}',
-                    //                     style: TextStyle(
-                    //                       color: Colors.grey[700],
-                    //                     ),
-                    //                   ),
-                    //                   trailing: IconButton(
-                    //                     icon: const Icon(Icons.delete,
-                    //                         color: Colors.red),
-                    //                     onPressed: () =>
-                    //                         _deleteCategory(doc.id),
-                    //                   ),
-                    //                 ),
-                    //               ),
-                    //             );
-                    //           },
-                    //         ),
-                    //       );
-                    //     },
-                    //   ),
-                    // ),
-                  ],
+                      const SizedBox(height: 16),
+                    ],
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }

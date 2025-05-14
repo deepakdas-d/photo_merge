@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:photomerge/main.dart';
 
@@ -10,6 +11,8 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
+  final _formKey = GlobalKey<FormState>();
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -20,14 +23,50 @@ class _SignupPageState extends State<SignupPage> {
   final FocusNode _passwordFocusNode = FocusNode();
   final FocusNode _confirmPasswordFocusNode = FocusNode();
 
-  String _selectedRole = 'user';
+  // String _selectedRole = 'user';
   bool _isLoading = false;
   String? _error;
   bool _passwordVisible = false;
   bool _confirmPasswordVisible = false;
 
+  // Validators
+  String? validateEmail(String? value) {
+    if (value == null || value.isEmpty) return 'Email is required';
+    if (value.length > 254) return 'Email is too long';
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(value)) return 'Enter a valid email';
+    return null;
+  }
+
+  String? validatePhone(String? value) {
+    if (value == null || value.isEmpty) return 'Phone number is required';
+    final phoneRegex = RegExp(r'^[6-9]\d{9}$');
+    if (!phoneRegex.hasMatch(value)) return 'Enter a valid Indian phone number';
+    return null;
+  }
+
+  String? validatePassword(String? value) {
+    if (value == null || value.isEmpty) return 'Password is required';
+    if (value.length < 6) return 'Password must be at least 6 characters';
+    return null;
+  }
+
+  String? validateConfirmPassword(String? value) {
+    if (value != _passwordController.text) return 'Passwords do not match';
+    return null;
+  }
+
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      // All validations passed, proceed with registration or submission
+      print('Form is valid');
+    } else {
+      print('Form has errors');
+    }
+  }
+
   Future<void> _signup() async {
-    final email = _emailController.text.trim();
+    final email = _emailController.text.trim().toLowerCase();
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
     final phone = _phoneController.text.trim();
@@ -164,7 +203,7 @@ class _SignupPageState extends State<SignupPage> {
                     const SizedBox(height: 40),
 
                     // Email field
-                    TextField(
+                    TextFormField(
                       focusNode: _emailFocusNode,
                       controller: _emailController,
                       decoration: InputDecoration(
@@ -191,14 +230,19 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
-                      onSubmitted: (_) =>
+                      validator: validateEmail,
+                      onFieldSubmitted: (_) =>
                           FocusScope.of(context).requestFocus(_phoneFocusNode),
                     ),
                     const SizedBox(height: 16),
 
-                    TextField(
+                    TextFormField(
                       focusNode: _phoneFocusNode,
                       controller: _phoneController,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
                       decoration: InputDecoration(
                         // labelText: 'Phone Number',
                         hintText: 'Enter your phone number',
@@ -223,13 +267,14 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       keyboardType: TextInputType.phone,
                       textInputAction: TextInputAction.next,
-                      onSubmitted: (_) => FocusScope.of(context)
+                      validator: validatePhone,
+                      onFieldSubmitted: (_) => FocusScope.of(context)
                           .requestFocus(_passwordFocusNode),
                     ),
                     const SizedBox(height: 16),
 
                     // Password field
-                    TextField(
+                    TextFormField(
                       focusNode: _passwordFocusNode,
                       controller: _passwordController,
                       decoration: InputDecoration(
@@ -269,11 +314,12 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                       obscureText: !_passwordVisible,
                       textInputAction: TextInputAction.next,
-                      onSubmitted: (_) => FocusScope.of(context)
+                      validator: validatePassword,
+                      onFieldSubmitted: (_) => FocusScope.of(context)
                           .requestFocus(_confirmPasswordFocusNode),
                     ),
                     const SizedBox(height: 16),
-                    TextField(
+                    TextFormField(
                       focusNode: _confirmPasswordFocusNode,
                       controller: _confirmPasswordController,
                       decoration: InputDecoration(
@@ -313,51 +359,9 @@ class _SignupPageState extends State<SignupPage> {
                             const EdgeInsets.symmetric(vertical: 16),
                       ),
                       obscureText: !_confirmPasswordVisible,
+                      validator: validateConfirmPassword,
                     ),
                     const SizedBox(height: 16),
-
-                    // Role selection (styled as a dropdown)
-                    // Container(
-                    //   padding: const EdgeInsets.symmetric(horizontal: 12),
-                    //   decoration: BoxDecoration(
-                    //     color: Colors.grey[50],
-                    //     borderRadius: BorderRadius.circular(12),
-                    //     border: Border.all(color: Colors.grey[300]!),
-                    //   ),
-                    //   child: Row(
-                    //     children: [
-                    //       Icon(Icons.person_outline, color: Colors.green),
-                    //       const SizedBox(width: 12),
-                    //       Expanded(
-                    //         child: DropdownButtonHideUnderline(
-                    //           child: DropdownButton<String>(
-                    //             value: _selectedRole,
-                    //             isExpanded: true,
-                    //             hint: const Text('Select account type'),
-                    //             items: [
-                    //               'user',
-                    //             ]
-                    //                 .map((role) => DropdownMenuItem(
-                    //                       value: role,
-                    //                       child: Text(
-                    //                         role.substring(0, 1).toUpperCase() +
-                    //                             role.substring(1),
-                    //                         style:
-                    //                             const TextStyle(fontSize: 16),
-                    //                       ),
-                    //                     ))
-                    //                 .toList(),
-                    //             onChanged: (value) {
-                    //               setState(() {
-                    //                 _selectedRole = value!;
-                    //               });
-                    //             },
-                    //           ),
-                    //         ),
-                    //       ),
-                    //     ],
-                    //   ),
-                    // ),
 
                     if (_error != null)
                       Padding(

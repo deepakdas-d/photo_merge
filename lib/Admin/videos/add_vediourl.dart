@@ -142,12 +142,22 @@ class _AddVediourlState extends State<AddVediourl> {
             color: Colors.white,
           ),
         ),
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            )),
         actions: [
           IconButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/adminlistvedio');
               },
-              icon: Icon(Icons.list))
+              icon: Icon(
+                Icons.list,
+                color: Colors.white,
+              ))
         ],
         backgroundColor: const Color(0xFF4CAF50),
       ),

@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 // import 'package:photomerge/User/View/home.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -743,6 +744,17 @@ class VideoPlayerScreen extends StatefulWidget {
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   late YoutubePlayerController _controller;
   bool _isFullScreen = false;
+  YoutubePlayerValue? _playerValue;
+  String _currentQuality = 'auto';
+  List<String> _availableQualities = [
+    'auto',
+    '144p',
+    '240p',
+    '360p',
+    '480p',
+    '720p',
+    '1080p'
+  ];
 
   @override
   void initState() {
@@ -756,134 +768,303 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         forceHD: false,
       ),
     );
+
+    // Listen to player value changes to update our UI
+    _controller.addListener(_onPlayerValueChange);
+
+    // Update quality options based on available formats
+    // Note: YouTube API limitations mean we can only toggle between HD and standard quality
+    _availableQualities = ['auto', '360p', '720p'];
+  }
+
+  void _onPlayerValueChange() {
+    if (!mounted) return;
+    setState(() {
+      _playerValue = _controller.value;
+    });
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_onPlayerValueChange);
     _controller.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return YoutubePlayerBuilder(
-      onExitFullScreen: () {
-        setState(() {
-          _isFullScreen = false;
-        });
-      },
-      onEnterFullScreen: () {
-        setState(() {
-          _isFullScreen = true;
-        });
-      },
-      player: YoutubePlayer(
-        controller: _controller,
-        showVideoProgressIndicator: true,
-        progressIndicatorColor: const Color(0xFF4CAF50),
-        progressColors: const ProgressBarColors(
-          playedColor: Color(0xFF4CAF50),
-          handleColor: Color(0xFF4CAF50),
-        ),
-        onReady: () {
-          // Player is ready
-        },
-      ),
-      builder: (context, player) {
-        return Scaffold(
-          appBar: _isFullScreen
-              ? null
-              : AppBar(
-                  backgroundColor: Colors.white,
-                  leading: IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    color: const Color(0xFF4CAF50),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  title: Text(
-                    widget.title,
-                    style: GoogleFonts.poppins(
-                      color: const Color(0xFF4CAF50),
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  elevation: 0,
-                ),
-          body: Column(
-            children: [
-              // YouTube Player
-              player,
+  void _skipBackward() {
+    final currentPosition = _controller.value.position.inSeconds;
+    _controller.seekTo(Duration(seconds: currentPosition - 10));
+  }
 
-              // Video information
-              if (!_isFullScreen)
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.title,
-                          style: GoogleFonts.poppins(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Video controls
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _buildControlButton(
-                              icon: Icons.replay_10,
-                              label: '10s',
-                              onTap: () {
-                                final currentPosition =
-                                    _controller.value.position.inSeconds;
-                                _controller.seekTo(
-                                    Duration(seconds: currentPosition - 10));
-                              },
-                            ),
-                            _buildControlButton(
-                              icon: _controller.value.isPlaying
-                                  ? Icons.pause
-                                  : Icons.play_arrow,
-                              label: _controller.value.isPlaying
-                                  ? 'Pause'
-                                  : 'Play',
-                              onTap: () {
-                                if (_controller.value.isPlaying) {
-                                  _controller.pause();
-                                } else {
-                                  _controller.play();
-                                }
-                                setState(() {});
-                              },
-                            ),
-                            _buildControlButton(
-                              icon: Icons.forward_10,
-                              label: '10s',
-                              onTap: () {
-                                final currentPosition =
-                                    _controller.value.position.inSeconds;
-                                _controller.seekTo(
-                                    Duration(seconds: currentPosition + 10));
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+  void _skipForward() {
+    final currentPosition = _controller.value.position.inSeconds;
+    _controller.seekTo(Duration(seconds: currentPosition + 10));
+  }
+
+  void _togglePlayPause() {
+    if (_controller.value.isPlaying) {
+      _controller.pause();
+    } else {
+      _controller.play();
+    }
+    setState(() {});
+  }
+
+  void _changeQuality(String quality) {
+    // Save current position before changing quality
+    final currentPosition = _controller.value.position;
+
+    // Update controller with new quality setting
+    if (quality == 'auto') {
+      // For auto, use default quality
+      _controller.updateValue(
+        _controller.value.copyWith(
+          playerState: PlayerState.unknown,
+        ),
+      );
+      _controller.reload();
+    } else if (quality == '720p') {
+      // For HD quality, recreate the controller with forceHD flag
+      _controller.dispose();
+      _controller = YoutubePlayerController(
+        initialVideoId: widget.videoId,
+        flags: const YoutubePlayerFlags(
+          autoPlay: true,
+          mute: false,
+          enableCaption: true,
+          forceHD: true,
+        ),
+      );
+      _controller.addListener(_onPlayerValueChange);
+      // Seek to previous position
+      _controller.seekTo(currentPosition);
+    } else {
+      // For other qualities, recreate controller without forceHD
+      _controller.dispose();
+      _controller = YoutubePlayerController(
+        initialVideoId: widget.videoId,
+        flags: const YoutubePlayerFlags(
+          autoPlay: true,
+          mute: false,
+          enableCaption: true,
+          forceHD: false,
+        ),
+      );
+      _controller.addListener(_onPlayerValueChange);
+      // Seek to previous position
+      _controller.seekTo(currentPosition);
+    }
+
+    setState(() {
+      _currentQuality = quality;
+    });
+
+    // Close the quality selection menu
+    Navigator.pop(context);
+  }
+
+  void _showQualitySelector() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Select Quality',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
+              ),
+              Divider(height: 1),
+              Expanded(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _availableQualities.length,
+                  itemBuilder: (context, index) {
+                    final quality = _availableQualities[index];
+                    return ListTile(
+                      title: Text(quality),
+                      trailing: _currentQuality == quality
+                          ? Icon(Icons.check, color: Color(0xFF4CAF50))
+                          : null,
+                      onTap: () => _changeQuality(quality),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
         );
       },
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+        onWillPop: () async {
+          // Force portrait orientation when navigating back
+          if (_isFullScreen) {
+            // If in fullscreen, exit fullscreen first
+            _controller.toggleFullScreenMode();
+            return false; // Prevent back navigation, just exit fullscreen
+          } else {
+            // Set to portrait mode
+            SystemChrome.setPreferredOrientations(
+                [DeviceOrientation.portraitUp]);
+            return true; // Allow back navigation
+          }
+        },
+        child: YoutubePlayerBuilder(
+          onExitFullScreen: () {
+            // Set to portrait mode when exiting fullscreen
+            SystemChrome.setPreferredOrientations(
+                [DeviceOrientation.portraitUp]);
+            setState(() {
+              _isFullScreen = false;
+            });
+          },
+          onEnterFullScreen: () {
+            // Allow landscape orientations when entering fullscreen
+            SystemChrome.setPreferredOrientations([
+              DeviceOrientation.landscapeLeft,
+              DeviceOrientation.landscapeRight,
+            ]);
+            setState(() {
+              _isFullScreen = true;
+            });
+          },
+          player: YoutubePlayer(
+            controller: _controller,
+            showVideoProgressIndicator: true,
+            progressIndicatorColor: const Color(0xFF4CAF50),
+            progressColors: const ProgressBarColors(
+              playedColor: Color(0xFF4CAF50),
+              handleColor: Color(0xFF4CAF50),
+            ),
+            onReady: () {
+              // Player is ready
+            },
+            bottomActions: [
+              // Custom bottom controls
+
+              CurrentPosition(),
+              ProgressBar(
+                isExpanded: true,
+                colors: const ProgressBarColors(
+                  playedColor: Color(0xFF4CAF50),
+                  handleColor: Color(0xFF4CAF50),
+                ),
+              ),
+              RemainingDuration(),
+              // Add quality selector button
+              IconButton(
+                  onPressed: _skipForward,
+                  icon: Icon(Icons.replay_10, color: Colors.white)),
+              IconButton(
+                  onPressed: _skipBackward,
+                  icon: Icon(Icons.forward_10, color: Colors.white)),
+              IconButton(
+                icon: const Icon(Icons.settings, color: Colors.white),
+                onPressed: _showQualitySelector,
+              ),
+              FullScreenButton(),
+            ],
+          ),
+          builder: (context, player) {
+            return Scaffold(
+              appBar: _isFullScreen
+                  ? null
+                  : AppBar(
+                      backgroundColor: Colors.white,
+                      leading: IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        color: const Color(0xFF4CAF50),
+                        onPressed: () {
+                          // Set to portrait mode before popping
+                          SystemChrome.setPreferredOrientations(
+                              [DeviceOrientation.portraitUp]);
+                          Navigator.pop(context);
+                        },
+                      ),
+                      title: Text(
+                        widget.title,
+                        style: GoogleFonts.poppins(
+                          color: const Color(0xFF4CAF50),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      elevation: 0,
+                    ),
+              body: Column(
+                children: [
+                  // YouTube Player
+                  player,
+
+                  // Video information
+                  if (!_isFullScreen)
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.title,
+                              style: GoogleFonts.poppins(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            // Video controls
+                            // Row(
+                            //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            //   children: [
+                            //     _buildControlButton(
+                            //       icon: Icons.replay_10,
+                            //       label: '10s',
+                            //       onTap: _skipBackward,
+                            //     ),
+                            //     _buildControlButton(
+                            //       icon: _playerValue?.isPlaying ?? false
+                            //           ? Icons.pause
+                            //           : Icons.play_arrow,
+                            //       label: _playerValue?.isPlaying ?? false
+                            //           ? 'Pause'
+                            //           : 'Play',
+                            //       onTap: _togglePlayPause,
+                            //     ),
+                            //     _buildControlButton(
+                            //       icon: Icons.forward_10,
+                            //       label: '10s',
+                            //       onTap: _skipForward,
+                            //     ),
+                            //     _buildControlButton(
+                            //       icon: Icons.high_quality,
+                            //       label: _currentQuality,
+                            //       onTap: _showQualitySelector,
+                            //     ),
+                            //   ],
+                            // ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          },
+        ));
   }
 
   Widget _buildControlButton({

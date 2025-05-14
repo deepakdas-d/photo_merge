@@ -273,7 +273,7 @@ class _UserDashboardState extends State<UserDashboard> {
                   Text(
                     userData?['email']?.isNotEmpty == true
                         ? userData!['email']
-                        : '',
+                        : 'not entered',
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.8),
                       fontSize: 14,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:photomerge/Admin/videos/update_video.dart';
 // Import update page
@@ -28,10 +29,21 @@ class VideoListPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'My Videos',
-          style: TextStyle(color: Colors.white),
+          style: GoogleFonts.oswald(
+            fontSize: 25,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            )),
         backgroundColor: const Color(0xFF4CAF50),
       ),
       body: StreamBuilder<QuerySnapshot>(
