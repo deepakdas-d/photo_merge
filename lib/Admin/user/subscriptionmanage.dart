@@ -312,76 +312,303 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('Approve Subscription'),
-          content: SingleChildScrollView(
+        builder: (context, setState) => Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          elevation: 5,
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+            padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('User: $email'),
-                const SizedBox(height: 10),
-                // const Text('Select Category:'),
-                // DropdownButton<String>(
-                //   value: selectedCategory,
-                //   isExpanded: true,
-                //   onChanged: (value) {
-                //     if (value != null) {
-                //       setState(() {
-                //         selectedCategory = value;
-                //       });
-                //     }
-                //   },
-                //   items: _categories.map((category) {
-                //     return DropdownMenuItem<String>(
-                //       value: category,
-                //       child: Text(category),
-                //     );
-                //   }).toList(),
-                // ),
+                // Header with gradient background
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
+                    ),
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF00B6B0), Color(0xFFE0F7F6)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.verified_user,
+                          color: Colors.white, size: 28),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Approve Subscription',
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 16),
-                const Text('Select Plan:'),
-                ..._categoryPlans[selectedCategory]?.map((plan) {
-                      final durationText = plan.duration.inDays >= 365
-                          ? '${plan.duration.inDays ~/ 365} year${plan.duration.inDays >= 730 ? 's' : ''}'
-                          : '${plan.duration.inDays} days';
 
-                      return Card(
-                        elevation: 2,
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        child: ListTile(
-                          title: Text(plan.name),
-                          subtitle: Column(
+                // User info card
+                Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Color(0xFFE0F7F6),
+                          child: Icon(Icons.person, color: Color(0xFF00B6B0)),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('₹${plan.price} - $durationText'),
-                              const SizedBox(height: 4),
-                              ...plan.features
-                                  .map((feature) => Text('• $feature',
-                                      style: const TextStyle(fontSize: 12)))
-                                  .toList(),
+                              Text(
+                                'Subscriber',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              Text(
+                                email,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ],
                           ),
-                          trailing: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white),
-                            onPressed: () => _updateSubscription(
-                                userId, email, selectedCategory, plan),
-                            child: const Text('Select'),
-                          ),
                         ),
-                      );
-                    }).toList() ??
-                    [],
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Category selector if needed
+                // You could add a category dropdown here
+
+                const Text(
+                  'Select Plan:',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Plans list
+                Expanded(
+                  child: _categoryPlans[selectedCategory]?.isEmpty ?? true
+                      ? Center(
+                          child: Text(
+                            'No plans available for this category',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount:
+                              _categoryPlans[selectedCategory]?.length ?? 0,
+                          itemBuilder: (context, index) {
+                            final plan =
+                                _categoryPlans[selectedCategory]![index];
+                            final durationText = plan.duration.inDays >= 365
+                                ? '${plan.duration.inDays ~/ 365} year${plan.duration.inDays >= 730 ? 's' : ''}'
+                                : '${plan.duration.inDays} days';
+
+                            final isRecommended = index ==
+                                1; // Example: Mark the middle option as recommended
+
+                            return Card(
+                              elevation: 2,
+                              margin: const EdgeInsets.symmetric(vertical: 8),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: isRecommended
+                                    ? BorderSide(
+                                        color: Color(0xFF00B6B0), width: 2)
+                                    : BorderSide.none,
+                              ),
+                              child: Stack(
+                                children: [
+                                  if (isRecommended)
+                                    Positioned(
+                                      top: 0,
+                                      right: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: Color(0xFF00B6B0),
+                                          borderRadius: const BorderRadius.only(
+                                            topRight: Radius.circular(12),
+                                            bottomLeft: Radius.circular(12),
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'RECOMMENDED',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    plan.name,
+                                                    style: const TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Row(
+                                                    children: [
+                                                      Text(
+                                                        '₹${plan.price}',
+                                                        style: TextStyle(
+                                                          fontSize: 20,
+                                                          color:
+                                                              Color(0xFF00B6B0),
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                      const SizedBox(width: 4),
+                                                      Text(
+                                                        '/ $durationText',
+                                                        style: TextStyle(
+                                                          color:
+                                                              Colors.grey[600],
+                                                          fontSize: 14,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    Color(0xFF00B6B0),
+                                                foregroundColor: Colors.white,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 20,
+                                                        vertical: 12),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              onPressed: () =>
+                                                  _updateSubscription(
+                                                      userId,
+                                                      email,
+                                                      selectedCategory,
+                                                      plan),
+                                              child: const Text(
+                                                'Select',
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 12),
+                                        const Divider(),
+                                        const SizedBox(height: 8),
+                                        const Text(
+                                          'Features:',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        ...plan.features.map((feature) =>
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 6),
+                                              child: Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Icon(
+                                                    Icons.check_circle,
+                                                    color: Color(0xFF00B6B0),
+                                                    size: 18,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Expanded(
+                                                    child: Text(
+                                                      feature,
+                                                      style: const TextStyle(
+                                                          fontSize: 14),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            )),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                ),
+
+                // Action buttons
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 12),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(color: Color(0xFF00B6B0)),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-          ],
         ),
       ),
     );
@@ -455,6 +682,40 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
 
   Future<void> _revokeSubscription(
       BuildContext context, String userId, String email) async {
+    // Show confirmation dialog before proceeding
+    final bool confirmed = await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              backgroundColor: Color(0xFFE0F7F6),
+              title: Text('Confirm Revocation'),
+              content: Text(
+                  'Are you sure you want to revoke the subscription for $email?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: Color(0xFF00B6B0)),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                    foregroundColor: Theme.of(context).colorScheme.onError,
+                  ),
+                  child: Text('Revoke'),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+
+    // Return early if user canceled
+    if (!confirmed) return;
+
     try {
       // Get current subscription details for record keeping
       final userDoc = await _firestore.collection('users').doc(userId).get();
@@ -499,7 +760,7 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
           'type': 'subscription_revoked',
         });
 
-        if (mounted) {
+        if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Subscription revoked for $email')),
           );
@@ -507,7 +768,7 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
       }
     } catch (e) {
       print('Error revoking subscription: $e');
-      if (mounted) {
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error revoking subscription: $e')),
         );
@@ -522,40 +783,75 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Extend Subscription'),
+        backgroundColor: Color(0xFFE0F7F6),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: Text(
+          'Extend Subscription',
+          style: TextStyle(
+            color: Color(0xFF00B6B0),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('User: $email'),
+            Text(
+              'User: $email',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
             const SizedBox(height: 8),
             if (currentExpiry != null)
               Text(
-                  'Current expiry: ${DateFormat('dd MMM yyyy').format(currentExpiry.toDate())}'),
+                'Current expiry: ${DateFormat('dd MMM yyyy').format(currentExpiry.toDate())}',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
             const SizedBox(height: 16),
             TextField(
               controller: daysController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Enter days to extend',
-                border: OutlineInputBorder(),
+                labelStyle: TextStyle(color: Color(0xFF00B6B0)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Color(0xFF00B6B0)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Color(0xFF00B6B0), width: 2),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: Color(0xFF00B6B0)),
+                ),
+                filled: true,
+                fillColor: Colors.white,
               ),
               keyboardType: TextInputType.number,
+              cursorColor: Color(0xFF00B6B0),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              foregroundColor: Color(0xFF00B6B0),
+            ),
             child: const Text('Cancel'),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
               try {
                 final days = int.tryParse(daysController.text);
                 if (days == null || days <= 0) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Please enter a valid number of days')),
+                    SnackBar(
+                      content: Text('Please enter a valid number of days'),
+                      backgroundColor: Color(0xFF00B6B0),
+                    ),
                   );
                   return;
                 }
@@ -564,7 +860,10 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
                     await _firestore.collection('users').doc(userId).get();
                 if (!userDoc.exists) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('User not found')),
+                    SnackBar(
+                      content: Text('User not found'),
+                      backgroundColor: Color(0xFF00B6B0),
+                    ),
                   );
                   return;
                 }
@@ -613,15 +912,27 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                      content: Text('Subscription extended by $days days')),
+                    content: Text('Subscription extended by $days days'),
+                    backgroundColor: Color(0xFF00B6B0),
+                  ),
                 );
               } catch (e) {
                 print('Error extending subscription: $e');
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error extending subscription: $e')),
+                  SnackBar(
+                    content: Text('Error extending subscription: $e'),
+                    backgroundColor: Colors.red,
+                  ),
                 );
               }
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color(0xFF00B6B0),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             child: const Text('Extend'),
           ),
         ],
