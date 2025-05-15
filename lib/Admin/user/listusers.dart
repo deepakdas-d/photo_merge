@@ -56,7 +56,7 @@ class _UserListPageState extends State<UserListPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: Colors.red,
+        backgroundColor: Color(0xFF00B6B0),
         title: Text(
           'All Users',
           style: GoogleFonts.oswald(

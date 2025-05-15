@@ -49,7 +49,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     },
     {
       'icon': Icons.person_add,
-      'title': 'List Users',
+      'title': 'Users',
       'subtitle': 'Manage users',
       'onTap': (BuildContext context) =>
           Navigator.pushNamed(context, '/listusers')
@@ -181,7 +181,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             Container(
               height: MediaQuery.of(context).size.height * 0.40,
               decoration: BoxDecoration(
-                color: Colors.red[600],
+                color: Color(0xFF00B6B0),
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(30),
                   bottomRight: Radius.circular(30),
@@ -201,11 +201,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "ADMIN DASHBOARD",
+                          "Welcome Back,",
                           style: GoogleFonts.oswald(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 25),
+                              fontSize: 35),
                         ),
                         CircleAvatar(
                           backgroundColor: Colors.white.withOpacity(0.3),
@@ -277,7 +277,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 12),
                       decoration: BoxDecoration(
-                        color: Colors.red[800]!.withOpacity(0.3),
+                        color: Colors.white.withOpacity(0.3),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: TextField(
@@ -302,15 +302,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     child: Container(
                       padding: EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Colors.indigo[900],
+                        color: Colors.transparent,
                         borderRadius: BorderRadius.circular(24),
                         boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            spreadRadius: 1,
-                            blurRadius: 10,
-                            offset: Offset(0, 5),
-                          ),
+                          // BoxShadow(
+                          //   color: Colors.black.withOpacity(0.1),
+                          //   spreadRadius: 1,
+                          //   blurRadius: 10,
+                          //   offset: Offset(0, 5),
+                          // ),
                         ],
                       ),
                       child: Column(
@@ -318,20 +318,20 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         children: [
                           Row(
                             children: [
-                              Icon(
-                                Icons.person,
-                                color: Colors.pink[100],
-                                size: 28,
-                              ),
+                              // Icon(
+                              //   Icons.person,
+                              //   color: Colors.white,
+                              //   size: 28,
+                              // ),
                               SizedBox(width: 12),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Welcome, ${_adminEmail ?? 'Admin'}!',
-                                    style: TextStyle(
-                                      fontFamily: 'Roboto',
-                                      fontSize: 20,
+                                    //  'Welcome, ${_adminEmail ?? 'Admin'}!',
+                                    "ADMIN DASHBOARD",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 30,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
                                     ),
@@ -341,14 +341,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 12),
-                          LinearProgressIndicator(
-                            value: 0.75,
-                            backgroundColor: Colors.white30,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.indigo[400]!),
-                          ),
-                          SizedBox(height: 8),
                         ],
                       ),
                     ),
@@ -367,10 +359,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            spreadRadius: 1,
-                            blurRadius: 10,
-                            offset: Offset(0, -5),
+                            color:
+                                Colors.black.withOpacity(0.7), // darker shadow
+                            spreadRadius: 8, // larger spread
+                            blurRadius: 30, // softer and wider
+                            offset: Offset(0, 10), // more vertical distance
                           ),
                         ],
                       ),
@@ -534,20 +527,46 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   // Helper methods for icon colors to match the design
   Color _getIconBackgroundColor(String title) {
-    if (title.contains('Categories')) return Colors.amber[100]!;
-    if (title.contains('Images')) return Colors.amber[100]!;
+    if (title.contains('Manage Categories')) return Colors.amber[100]!;
+    if (title.contains('Add Images')) return Colors.yellow[100]!;
     if (title.contains('List')) return Colors.blue[100]!;
     if (title.contains('Users')) return Colors.red[100]!;
     if (title.contains('Subscriptions')) return Colors.purple[100]!;
+    if (title.contains('Video')) return Colors.green[100]!;
+
     return Colors.teal[100]!;
   }
 
   Color _getIconColor(String title) {
-    if (title.contains('Categories')) return Colors.amber[800]!;
-    if (title.contains('Images')) return Colors.amber[800]!;
+    if (title.contains('Manage Categories')) return Colors.amber[800]!;
+    if (title.contains('Add Images')) return Colors.indigo[800]!;
     if (title.contains('List')) return Colors.blue[800]!;
     if (title.contains('Users')) return Colors.red[800]!;
     if (title.contains('Subscriptions')) return Colors.purple[800]!;
+    if (title.contains('Video')) return Colors.green[800]!;
     return Colors.teal[800]!;
+  }
+
+  LinearGradient _gridcolor(String title) {
+    if (title.contains('Categories')) {
+      return LinearGradient(colors: [Colors.amber[100]!, Colors.amber[200]!]);
+    }
+    if (title.contains('Images')) {
+      return LinearGradient(colors: [Colors.orange[100]!, Colors.orange[200]!]);
+    }
+    if (title.contains('List')) {
+      return LinearGradient(colors: [Colors.blue[100]!, Colors.blue[200]!]);
+    }
+    if (title.contains('Users')) {
+      return LinearGradient(colors: [Colors.red[100]!, Colors.red[200]!]);
+    }
+    if (title.contains('Subscriptions')) {
+      return LinearGradient(colors: [Colors.purple[100]!, Colors.purple[200]!]);
+    }
+    if (title.contains('Video')) {
+      return LinearGradient(colors: [Colors.green[100]!, Colors.green[200]!]);
+    }
+
+    return LinearGradient(colors: [Colors.teal[100]!, Colors.teal[200]!]);
   }
 }

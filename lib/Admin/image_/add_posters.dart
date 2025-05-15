@@ -183,7 +183,7 @@ class _AddImagePageState extends State<AddImagePage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.red,
+          backgroundColor: Color(0xFF00B6B0),
           title: Text(
             'Add Images',
             style: GoogleFonts.oswald(
@@ -502,7 +502,7 @@ class _AddImagePageState extends State<AddImagePage> {
                               style: TextStyle(color: Colors.white),
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
+                              backgroundColor: Color(0xFF00B6B0),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -517,7 +517,7 @@ class _AddImagePageState extends State<AddImagePage> {
                             label: const Text('Upload',
                                 style: TextStyle(color: Colors.white)),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
+                              backgroundColor: Color(0xFF00B6B0),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),

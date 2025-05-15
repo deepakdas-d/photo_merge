@@ -230,7 +230,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Colors.red,
+        backgroundColor: Color(0xFF00B6B0),
         automaticallyImplyLeading: false,
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
@@ -294,7 +294,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
         children: [
           Row(
             children: [
-              Icon(icon, color: Colors.red, size: 22),
+              Icon(icon, color: Color(0xFF00B6B0), size: 22),
               SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -307,7 +307,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
           ),
           SizedBox(height: 4), // space before underline
           Divider(
-            color: Colors.red, // underline color
+            color: Colors.black, // underline color
             thickness: 1, // thickness of underline
             height: 1,
           ),

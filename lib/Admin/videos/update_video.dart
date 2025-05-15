@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class UpdateVideoPage extends StatefulWidget {
   final String videoId;
@@ -124,11 +125,12 @@ class _UpdateVideoPageState extends State<UpdateVideoPage> {
               Icons.arrow_back,
               color: Colors.white,
             )),
-        title: const Text(
-          'Update YouTube Video',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.red,
+        title: Text('Update YouTube Video',
+            style: GoogleFonts.oswald(
+                color: Colors.white,
+                fontSize: 25,
+                fontWeight: FontWeight.bold)),
+        backgroundColor: Color(0xFF00B6B0),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -150,7 +152,7 @@ class _UpdateVideoPageState extends State<UpdateVideoPage> {
                 labelText: 'Video Name',
                 hintText: 'e.g., My Vacation Video',
                 border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.title, color: Colors.red),
+                prefixIcon: const Icon(Icons.title, color: Color(0xFF00B6B0)),
               ),
               keyboardType: TextInputType.text,
             ),
@@ -161,7 +163,7 @@ class _UpdateVideoPageState extends State<UpdateVideoPage> {
                 labelText: 'YouTube URL',
                 hintText: 'e.g., https://www.youtube.com/watch?v=abc123',
                 border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.link, color: Colors.red),
+                prefixIcon: const Icon(Icons.link, color: Color(0xFF00B6B0)),
               ),
               keyboardType: TextInputType.url,
             ),
@@ -171,7 +173,8 @@ class _UpdateVideoPageState extends State<UpdateVideoPage> {
               decoration: InputDecoration(
                 labelText: 'Category',
                 border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.category, color: Colors.red),
+                prefixIcon:
+                    const Icon(Icons.category, color: Color(0xFF00B6B0)),
               ),
               hint: const Text('Select a category'),
               items: _categories.map((category) {
@@ -190,13 +193,13 @@ class _UpdateVideoPageState extends State<UpdateVideoPage> {
             _isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      color: Colors.red,
+                      color: Color(0xFF00B6B0),
                     ),
                   )
                 : ElevatedButton(
                     onPressed: _updateVideo,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor: Color(0xFF00B6B0),
                       minimumSize: const Size(double.infinity, 48),
                     ),
                     child: const Text(

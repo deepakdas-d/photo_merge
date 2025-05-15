@@ -688,7 +688,7 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Manage Subscriptions'),
-          backgroundColor: Colors.green,
+          backgroundColor: Color(0xFF00B6B0),
         ),
         body: const Center(child: CircularProgressIndicator()),
       );
@@ -705,7 +705,7 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
             color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.red,
+        backgroundColor: Color(0xFF00B6B0),
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const Icon(
@@ -833,8 +833,14 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
                                     ElevatedButton.icon(
                                       onPressed: () => _approveSubscription(
                                           context, userId, email),
-                                      icon: const Icon(Icons.add),
-                                      label: const Text('New Plan'),
+                                      icon: const Icon(
+                                        Icons.add,
+                                        color: Colors.white,
+                                      ),
+                                      label: const Text(
+                                        'New Plan',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.green,
                                       ),
@@ -846,8 +852,13 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
                                             userId,
                                             email,
                                             subscriptionExpiry),
-                                        icon: const Icon(Icons.extension),
-                                        label: const Text('Extend'),
+                                        icon: const Icon(
+                                          Icons.extension,
+                                          color: Colors.white,
+                                        ),
+                                        label: const Text('Extend',
+                                            style:
+                                                TextStyle(color: Colors.white)),
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.blue,
                                         ),
@@ -856,8 +867,13 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
                                       ElevatedButton.icon(
                                         onPressed: () => _revokeSubscription(
                                             context, userId, email),
-                                        icon: const Icon(Icons.remove_circle),
-                                        label: const Text('Revoke'),
+                                        icon: const Icon(
+                                          Icons.remove_circle,
+                                          color: Colors.white,
+                                        ),
+                                        label: const Text('Revoke',
+                                            style:
+                                                TextStyle(color: Colors.white)),
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.red,
                                         ),

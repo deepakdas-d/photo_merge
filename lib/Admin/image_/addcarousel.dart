@@ -169,7 +169,7 @@ class _AdminImageUploadPageState extends State<AdminImageUploadPage> {
           icon: Icon(Icons.arrow_back),
           color: Colors.white,
         ),
-        backgroundColor: Colors.red,
+        backgroundColor: Color(0xFF00B6B0),
         title: Text(
           'Admin: Update Carousel Images',
           style: GoogleFonts.oswald(
@@ -237,7 +237,8 @@ class _AdminImageUploadPageState extends State<AdminImageUploadPage> {
               ),
             const SizedBox(height: 16),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              style:
+                  ElevatedButton.styleFrom(backgroundColor: Color(0xFF00B6B0)),
               onPressed: isUploading ||
                       (images.every((img) => img == null) &&
                           imageUrls.any((url) => url == null))

@@ -44,7 +44,7 @@ class VideoListPage extends StatelessWidget {
               Icons.arrow_back,
               color: Colors.white,
             )),
-        backgroundColor: Colors.red,
+        backgroundColor: Color(0xFF00B6B0),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _firestore

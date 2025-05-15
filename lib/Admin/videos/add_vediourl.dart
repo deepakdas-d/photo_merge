@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AddVediourl extends StatefulWidget {
   const AddVediourl({super.key});
@@ -118,14 +119,12 @@ class _AddVediourlState extends State<AddVediourl> {
     if (currentUser == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text(
+          title: Text(
             'Add YouTube Video',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+            style: GoogleFonts.oswald(
+                fontWeight: FontWeight.bold, color: Colors.white, fontSize: 25),
           ),
-          backgroundColor: Colors.red,
+          backgroundColor: Color(0xFF00B6B0),
         ),
         body: const Center(
           child: Text('Please sign in to add YouTube videos'),
@@ -135,12 +134,10 @@ class _AddVediourlState extends State<AddVediourl> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Add YouTube Video',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
+          style: GoogleFonts.oswald(
+              fontWeight: FontWeight.bold, color: Colors.white, fontSize: 25),
         ),
         automaticallyImplyLeading: false,
         leading: IconButton(
@@ -159,7 +156,7 @@ class _AddVediourlState extends State<AddVediourl> {
                 color: Colors.white,
               ))
         ],
-        backgroundColor: Colors.red,
+        backgroundColor: Color(0xFF00B6B0),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -181,7 +178,7 @@ class _AddVediourlState extends State<AddVediourl> {
                 labelText: 'Video Name',
                 hintText: 'e.g., My Vacation Video',
                 border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.title, color: Color(0xFF4CAF50)),
+                prefixIcon: const Icon(Icons.title, color: Color(0xFF00B6B0)),
               ),
               keyboardType: TextInputType.text,
             ),
@@ -192,7 +189,7 @@ class _AddVediourlState extends State<AddVediourl> {
                 labelText: 'YouTube URL',
                 hintText: 'e.g., https://www.youtube.com/watch?v=abc123',
                 border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.link, color: Color(0xFF4CAF50)),
+                prefixIcon: const Icon(Icons.link, color: Color(0xFF00B6B0)),
               ),
               keyboardType: TextInputType.url,
             ),
@@ -203,7 +200,7 @@ class _AddVediourlState extends State<AddVediourl> {
                 labelText: 'Category',
                 border: const OutlineInputBorder(),
                 prefixIcon:
-                    const Icon(Icons.category, color: Color(0xFF4CAF50)),
+                    const Icon(Icons.category, color: Color(0xFF00B6B0)),
               ),
               hint: const Text('Select a category'),
               items: _categories.map((category) {
@@ -228,7 +225,7 @@ class _AddVediourlState extends State<AddVediourl> {
                 : ElevatedButton(
                     onPressed: _submitUrl,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4CAF50),
+                      backgroundColor: Color(0xFF00B6B0),
                       minimumSize: const Size(double.infinity, 48),
                     ),
                     child: const Text(
