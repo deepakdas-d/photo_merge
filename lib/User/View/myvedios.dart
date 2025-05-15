@@ -806,15 +806,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     _controller.seekTo(Duration(seconds: currentPosition + 10));
   }
 
-  // void _togglePlayPause() {
-  //   if (_controller.value.isPlaying) {
-  //     _controller.pause();
-  //   } else {
-  //     _controller.play();
-  //   }
-  //   setState(() {});
-  // }
-
   void _changeQuality(String quality) {
     // Save current position before changing quality
     final currentPosition = _controller.value.position;
@@ -1031,36 +1022,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            // Video controls
-                            // Row(
-                            //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            //   children: [
-                            //     _buildControlButton(
-                            //       icon: Icons.replay_10,
-                            //       label: '10s',
-                            //       onTap: _skipBackward,
-                            //     ),
-                            //     _buildControlButton(
-                            //       icon: _playerValue?.isPlaying ?? false
-                            //           ? Icons.pause
-                            //           : Icons.play_arrow,
-                            //       label: _playerValue?.isPlaying ?? false
-                            //           ? 'Pause'
-                            //           : 'Play',
-                            //       onTap: _togglePlayPause,
-                            //     ),
-                            //     _buildControlButton(
-                            //       icon: Icons.forward_10,
-                            //       label: '10s',
-                            //       onTap: _skipForward,
-                            //     ),
-                            //     _buildControlButton(
-                            //       icon: Icons.high_quality,
-                            //       label: _currentQuality,
-                            //       onTap: _showQualitySelector,
-                            //     ),
-                            //   ],
-                            // ),
                           ],
                         ),
                       ),
@@ -1070,44 +1031,5 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
             );
           },
         ));
-  }
-
-  Widget _buildControlButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(50),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF4CAF50).withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                color: const Color(0xFF4CAF50),
-                size: 28,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.black87,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

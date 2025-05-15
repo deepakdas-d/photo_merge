@@ -190,7 +190,7 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
             fontSize: 25,
           ),
         ),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.red,
         centerTitle: true,
         automaticallyImplyLeading: false,
         leading: IconButton(
@@ -274,7 +274,7 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
                           ElevatedButton(
                             onPressed: _pickImage,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
+                              backgroundColor: Colors.red,
                             ),
                             child: const Text(
                               'Pick Image',
@@ -287,7 +287,7 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
                       ElevatedButton(
                         onPressed: _addCategory,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
+                          backgroundColor: Colors.red,
                         ),
                         child: const Text(
                           'Add Category',
@@ -382,7 +382,7 @@ class _CategoryManagementPageState extends State<CategoryManagementPage> {
                       ElevatedButton(
                         onPressed: _addSubcategory,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
+                          backgroundColor: Colors.red,
                         ),
                         child: const Text(
                           'Add Subcategory',

@@ -19,7 +19,7 @@ class VideoListPage extends StatelessWidget {
       return Scaffold(
         appBar: AppBar(
           title: const Text('My Videos'),
-          backgroundColor: const Color(0xFF4CAF50),
+          backgroundColor: Colors.red,
         ),
         body: const Center(
           child: Text('Please sign in to view your videos'),
@@ -44,7 +44,7 @@ class VideoListPage extends StatelessWidget {
               Icons.arrow_back,
               color: Colors.white,
             )),
-        backgroundColor: const Color(0xFF4CAF50),
+        backgroundColor: Colors.red,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _firestore

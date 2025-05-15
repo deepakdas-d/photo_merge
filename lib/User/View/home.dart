@@ -68,6 +68,37 @@ class _UserDashboardState extends State<UserDashboard> {
     }
   }
 
+  Future<void> logout() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .update({
+          'isLoggedIn': false,
+          'deviceId': '',
+        });
+      }
+      await FirebaseAuth.instance.signOut();
+    } catch (e) {
+      print('Error during logout: $e');
+    }
+  }
+
+  Future<void> _signOut() async {
+    try {
+      await logout(); // This handles Firestore update and sign out
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/login');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error signing out: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -375,7 +406,10 @@ class _UserDashboardState extends State<UserDashboard> {
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.green,
                         ),
-                        onPressed: () => Navigator.of(context).pop(true),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _signOut();
+                        },
                         child: const Text(
                           'Exit',
                           style: TextStyle(color: Colors.white),
@@ -384,10 +418,6 @@ class _UserDashboardState extends State<UserDashboard> {
                     ],
                   ),
                 );
-                if (shouldLogout == true && mounted) {
-                  await FirebaseAuth.instance.signOut();
-                  Navigator.pushReplacementNamed(context, '/login');
-                }
               },
             ),
           ],

@@ -230,7 +230,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.red,
         automaticallyImplyLeading: false,
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
@@ -289,16 +289,27 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
   Widget _buildProfileRow(String label, String value, IconData icon) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Colors.green, size: 22),
-          SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              '$label: $value',
-              style: TextStyle(fontSize: 18, color: Colors.black),
-              overflow: TextOverflow.ellipsis,
-            ),
+          Row(
+            children: [
+              Icon(icon, color: Colors.red, size: 22),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '$label: $value',
+                  style: TextStyle(fontSize: 18, color: Colors.black),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 4), // space before underline
+          Divider(
+            color: Colors.red, // underline color
+            thickness: 1, // thickness of underline
+            height: 1,
           ),
         ],
       ),

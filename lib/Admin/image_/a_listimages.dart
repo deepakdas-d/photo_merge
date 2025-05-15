@@ -151,7 +151,7 @@ class _ListImagesPageState extends State<ListImagesPage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.red,
         title: Text(
           'Image Gallery',
           style: GoogleFonts.oswald(

@@ -321,24 +321,24 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
               children: [
                 Text('User: $email'),
                 const SizedBox(height: 10),
-                const Text('Select Category:'),
-                DropdownButton<String>(
-                  value: selectedCategory,
-                  isExpanded: true,
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() {
-                        selectedCategory = value;
-                      });
-                    }
-                  },
-                  items: _categories.map((category) {
-                    return DropdownMenuItem<String>(
-                      value: category,
-                      child: Text(category),
-                    );
-                  }).toList(),
-                ),
+                // const Text('Select Category:'),
+                // DropdownButton<String>(
+                //   value: selectedCategory,
+                //   isExpanded: true,
+                //   onChanged: (value) {
+                //     if (value != null) {
+                //       setState(() {
+                //         selectedCategory = value;
+                //       });
+                //     }
+                //   },
+                //   items: _categories.map((category) {
+                //     return DropdownMenuItem<String>(
+                //       value: category,
+                //       child: Text(category),
+                //     );
+                //   }).toList(),
+                // ),
                 const SizedBox(height: 16),
                 const Text('Select Plan:'),
                 ..._categoryPlans[selectedCategory]?.map((plan) {
@@ -363,6 +363,8 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
                             ],
                           ),
                           trailing: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white),
                             onPressed: () => _updateSubscription(
                                 userId, email, selectedCategory, plan),
                             child: const Text('Select'),
@@ -703,7 +705,7 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
             color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.red,
         automaticallyImplyLeading: false,
         leading: IconButton(
           icon: const Icon(

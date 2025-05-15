@@ -21,7 +21,6 @@ class _UpdateVideoPageState extends State<UpdateVideoPage> {
   String? _selectedCategory;
   bool _isLoading = false;
 
-  // List of categories for the dropdown
   final List<String> _categories = [
     'Tutorial',
     'Entertainment',
@@ -31,7 +30,6 @@ class _UpdateVideoPageState extends State<UpdateVideoPage> {
     'Other',
   ];
 
-  // Regular expression for validating YouTube URLs
   final _youtubeUrlPattern = RegExp(
     r'^(https?://)?(www\.)?(youtube\.com/watch\?v=|youtu\.be/)([a-zA-Z0-9_-]{11})(.*)?$',
     caseSensitive: false,
@@ -40,7 +38,6 @@ class _UpdateVideoPageState extends State<UpdateVideoPage> {
   @override
   void initState() {
     super.initState();
-    // Pre-populate fields with existing data
     _urlController.text = widget.videoData['url'] ?? '';
     _nameController.text = widget.videoData['name'] ?? '';
     _selectedCategory = widget.videoData['category'] ?? _categories[0];
@@ -58,7 +55,6 @@ class _UpdateVideoPageState extends State<UpdateVideoPage> {
     final name = _nameController.text.trim();
     final category = _selectedCategory;
 
-    // Validate inputs
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please enter a video name')),
@@ -92,7 +88,6 @@ class _UpdateVideoPageState extends State<UpdateVideoPage> {
     });
 
     try {
-      // Update video in Firestore
       await FirebaseFirestore.instance
           .collection('videos')
           .doc(widget.videoId)
@@ -106,7 +101,7 @@ class _UpdateVideoPageState extends State<UpdateVideoPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Video updated successfully')),
       );
-      Navigator.pop(context); // Return to VideoListPage
+      Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error updating video: $e')),
@@ -122,11 +117,18 @@ class _UpdateVideoPageState extends State<UpdateVideoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+            )),
         title: const Text(
           'Update YouTube Video',
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: const Color(0xFF4CAF50),
+        backgroundColor: Colors.red,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -148,7 +150,7 @@ class _UpdateVideoPageState extends State<UpdateVideoPage> {
                 labelText: 'Video Name',
                 hintText: 'e.g., My Vacation Video',
                 border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.title, color: Color(0xFF4CAF50)),
+                prefixIcon: const Icon(Icons.title, color: Colors.red),
               ),
               keyboardType: TextInputType.text,
             ),
@@ -159,7 +161,7 @@ class _UpdateVideoPageState extends State<UpdateVideoPage> {
                 labelText: 'YouTube URL',
                 hintText: 'e.g., https://www.youtube.com/watch?v=abc123',
                 border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.link, color: Color(0xFF4CAF50)),
+                prefixIcon: const Icon(Icons.link, color: Colors.red),
               ),
               keyboardType: TextInputType.url,
             ),
@@ -169,8 +171,7 @@ class _UpdateVideoPageState extends State<UpdateVideoPage> {
               decoration: InputDecoration(
                 labelText: 'Category',
                 border: const OutlineInputBorder(),
-                prefixIcon:
-                    const Icon(Icons.category, color: Color(0xFF4CAF50)),
+                prefixIcon: const Icon(Icons.category, color: Colors.red),
               ),
               hint: const Text('Select a category'),
               items: _categories.map((category) {
@@ -189,13 +190,13 @@ class _UpdateVideoPageState extends State<UpdateVideoPage> {
             _isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      color: Color(0xFF4CAF50),
+                      color: Colors.red,
                     ),
                   )
                 : ElevatedButton(
                     onPressed: _updateVideo,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4CAF50),
+                      backgroundColor: Colors.red,
                       minimumSize: const Size(double.infinity, 48),
                     ),
                     child: const Text(

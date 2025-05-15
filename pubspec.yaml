@@ -61,7 +61,10 @@ dependencies:
   just_audio_background: ^0.0.1-beta.17
   just_audio: ^0.10.2
   uuid: ^4.5.1
-  flutter_secure_storage: ^4.2.1
+  flutter_secure_storage: ^9.0.0
+  audio_session: ^0.2.2
+  
+
      
 
   

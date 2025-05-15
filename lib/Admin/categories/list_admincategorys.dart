@@ -91,7 +91,7 @@ class _ListCategoriesAndSubcategoriesState
             fontSize: 25,
           ),
         ),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.red,
       ),
       body: Column(
         children: [

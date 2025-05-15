@@ -165,11 +165,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: Text('No', style: TextStyle(color: Colors.green[600])),
+                child: Text('No', style: TextStyle(color: Colors.red[600])),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: Text('Yes', style: TextStyle(color: Colors.green[600])),
+                child: Text('Yes', style: TextStyle(color: Colors.red[600])),
               ),
             ],
           ),
@@ -179,96 +179,110 @@ class _AdminDashboardState extends State<AdminDashboard> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(60.0), // Adjust height as needed
+          preferredSize: Size.fromHeight(200.0), // Adjust height as needed
           child: ClipPath(
             clipper: CurvedBottomClipper(),
             child: Container(
-              color: Colors.green[600],
+              color: Colors.red[600],
               padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
               child: SafeArea(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          _isSearching = !_isSearching;
-                          if (!_isSearching) {
-                            _searchController.clear();
-                            _filteredActions = _allActions;
-                          }
-                        });
-                      },
-                      icon: Icon(Icons.search, color: Colors.white),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 80.0),
+                      child: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _isSearching = !_isSearching;
+                            if (!_isSearching) {
+                              _searchController.clear();
+                              _filteredActions = _allActions;
+                            }
+                          });
+                        },
+                        icon: Icon(Icons.search, color: Colors.white),
+                      ),
                     ),
                     Expanded(
                       child: Center(
                         child: _isSearching
-                            ? TextField(
-                                controller: _searchController,
-                                autofocus: true,
-                                onChanged: _filterSearch,
-                                decoration: InputDecoration(
-                                  hintText: 'Search actions...',
-                                  hintStyle: TextStyle(color: Colors.white70),
-                                  border: InputBorder.none,
+                            ? Padding(
+                                padding: const EdgeInsets.only(
+                                    bottom: 45.0, left: 20),
+                                child: TextField(
+                                  controller: _searchController,
+                                  autofocus: true,
+                                  onChanged: _filterSearch,
+                                  decoration: InputDecoration(
+                                    hintText: 'Search actions...',
+                                    hintStyle: TextStyle(color: Colors.white70),
+                                    border: InputBorder.none,
+                                  ),
+                                  style: TextStyle(color: Colors.white),
                                 ),
-                                style: TextStyle(color: Colors.white),
                               )
-                            : Text(
-                                'Admin Dashboard',
-                                style: GoogleFonts.oswald(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20),
+                            : Padding(
+                                padding: const EdgeInsets.only(bottom: 80.0),
+                                child: Text(
+                                  'Admin Dashboard',
+                                  style: GoogleFonts.oswald(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 30),
+                                ),
                               ),
                       ),
                     ),
-                    IconButton(
-                      icon: Icon(Icons.logout, color: Colors.white),
-                      tooltip: 'Sign Out',
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              backgroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              title: Text(
-                                'Confirm Logout',
-                                style: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.bold,
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 90.0),
+                      child: IconButton(
+                        icon: Icon(Icons.logout, color: Colors.white),
+                        tooltip: 'Sign Out',
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                backgroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                              ),
-                              content:
-                                  Text('Are you sure you want to log out?'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(),
-                                  child: Text(
-                                    'Cancel',
-                                    style: TextStyle(color: Colors.green[600]),
+                                title: Text(
+                                  'Confirm Logout',
+                                  style: TextStyle(
+                                    fontFamily: 'Roboto',
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                    _signOut();
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green[600],
-                                    foregroundColor: Colors.white,
+                                content:
+                                    Text('Are you sure you want to log out?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
+                                    child: Text(
+                                      'Cancel',
+                                      style: TextStyle(color: Colors.red[600]),
+                                    ),
                                   ),
-                                  child: Text('Logout'),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      _signOut();
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red[600],
+                                      foregroundColor: Colors.white,
+                                    ),
+                                    child: Text('Logout'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -277,76 +291,90 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
         ),
         body: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Welcome Message
-                Container(
-                  padding: EdgeInsets.all(16.0),
-                  margin: EdgeInsets.symmetric(vertical: 8.0),
-                  decoration: BoxDecoration(
-                    color: Colors.green[100],
-                    borderRadius: BorderRadius.circular(12.0),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.2),
-                        blurRadius: 6,
-                        spreadRadius: 1,
-                        offset: Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Welcome, ${_adminEmail ?? 'Admin'}!',
-                      style: TextStyle(
-                        fontFamily: 'Roboto',
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.green[800],
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 16),
-                Text(
-                  'Manage Your Gallery:',
-                  style: TextStyle(
-                    fontFamily: 'Roboto',
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
-                  ),
-                ),
-                SizedBox(height: 16),
-                Expanded(
-                  child: _filteredActions.isEmpty
-                      ? Center(
+          color: Colors.white,
+          child: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircleAvatar(
+                          radius: 40,
+                          backgroundColor: Colors.red[200],
+                          child: Icon(
+                            Icons.person,
+                            size: 40,
+                            color: Colors.red[800],
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Container(
+                          padding: EdgeInsets.all(16.0),
+                          margin: EdgeInsets.symmetric(vertical: 8.0),
+                          decoration: BoxDecoration(
+                            color: Colors.red[100],
+                            borderRadius: BorderRadius.circular(12.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.2),
+                                blurRadius: 6,
+                                spreadRadius: 1,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
                           child: Text(
-                            'No matching actions found.',
+                            'Welcome, ${_adminEmail ?? 'Admin'}!',
                             style: TextStyle(
                               fontFamily: 'Roboto',
-                              fontSize: 16,
-                              color: Colors.grey[600],
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red[800],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Manage Your Gallery:',
+                    style: TextStyle(
+                      fontFamily: 'Roboto',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  _filteredActions.isEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(32.0),
+                            child: Text(
+                              'No matching actions found.',
+                              style: TextStyle(
+                                fontFamily: 'Roboto',
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                              ),
                             ),
                           ),
                         )
-                      : GridView.builder(
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 16.0,
-                            mainAxisSpacing: 16.0,
-                            childAspectRatio: 1.0,
-                          ),
-                          itemCount: _filteredActions.length,
-                          itemBuilder: (context, index) {
-                            final action = _filteredActions[index];
+                      : GridView.count(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16.0,
+                          mainAxisSpacing: 16.0,
+                          childAspectRatio: 1.0,
+                          physics: NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          children: _filteredActions.map((action) {
                             return _buildActionTile(
                               context,
                               icon: action['icon'] as IconData,
@@ -358,10 +386,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                 onTapFn(context);
                               },
                             );
-                          },
+                          }).toList(),
                         ),
-                ),
-              ],
+                  SizedBox(height: 16),
+                ],
+              ),
             ),
           ),
         ),
@@ -399,11 +428,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: Colors.green[600],
+                color: Colors.red[600],
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.green.withOpacity(0.3),
+                    color: Colors.red.withOpacity(0.3),
                     blurRadius: 6,
                     spreadRadius: 1,
                   ),
@@ -496,31 +525,17 @@ class _SubtitleWithAnimationState extends State<SubtitleWithAnimation>
 class CurvedBottomClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
-    final path = Path();
-    final width = size.width;
-    final height = size.height;
+    var path = Path();
 
-    // Height of the arc curve
-    final arcHeight = 30.0;
+    final p0 = size.height * 0.75;
+    path.lineTo(0.0, p0);
 
-    // Start from top-left
-    path.moveTo(0, 0);
-
-    // Line to bottom-left
-    path.lineTo(0, height - arcHeight);
-
-    // Draw the perfect arc using quadraticBezierTo
+    final controlPoint = Offset(size.width * 0.5, size.height);
+    final endPoint = Offset(size.width + 50, size.height / 3);
     path.quadraticBezierTo(
-      width / 2, // control point x
-      height + arcHeight, // control point y (below the bottom edge)
-      width, // end point x
-      height - arcHeight, // end point y
-    );
+        controlPoint.dx, controlPoint.dy, endPoint.dx, endPoint.dy);
 
-    // Line to top-right
-    path.lineTo(width, 0);
-
-    // Close the path
+    path.lineTo(size.width, 0.0);
     path.close();
 
     return path;
