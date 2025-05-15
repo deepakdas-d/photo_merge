@@ -23,7 +23,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     {
       'icon': Icons.category,
       'title': 'Manage Categories',
-      'subtitle': 'Add, edit, or delete categories and subcategories.',
+      'subtitle': 'Add, edit, or delete categories',
       'onTap': (BuildContext context) => Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => CategoryManagementPage()),
@@ -32,7 +32,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     {
       'icon': Icons.add_photo_alternate,
       'title': 'Add Images',
-      'subtitle': 'Upload new images to the gallery.',
+      'subtitle': 'Upload new images',
       'onTap': (BuildContext context) => Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => AddImagePage()),
@@ -41,37 +41,30 @@ class _AdminDashboardState extends State<AdminDashboard> {
     {
       'icon': Icons.image,
       'title': 'List Images',
-      'subtitle': 'View and manage all uploaded images.',
+      'subtitle': 'View all images',
       'onTap': (BuildContext context) => Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => ListImagesPage()),
           )
     },
-    // {
-    //   'icon': Icons.person_add,
-    //   'title': 'Add Admin',
-    //   'subtitle': 'Create a new admin account.',
-    //   'onTap': (BuildContext context) =>
-    //       Navigator.pushNamed(context, '/createadmin')
-    // },
     {
       'icon': Icons.person_add,
       'title': 'List Users',
-      'subtitle': 'List all users.',
+      'subtitle': 'Manage users',
       'onTap': (BuildContext context) =>
           Navigator.pushNamed(context, '/listusers')
     },
     {
       'icon': Icons.money_rounded,
       'title': 'Subscriptions',
-      'subtitle': 'Manage subscriptions.',
+      'subtitle': 'Subscription plans',
       'onTap': (BuildContext context) =>
           Navigator.pushNamed(context, '/submanage')
     },
     {
       'icon': Icons.view_carousel,
       'title': 'Carousel',
-      'subtitle': 'Manage carousel items.',
+      'subtitle': 'Manage slideshows',
       'onTap': (BuildContext context) =>
           Navigator.pushNamed(context, '/carousel')
     },
@@ -91,6 +84,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
     super.initState();
     _loadAdminData();
     _filteredActions = _allActions;
+  }
+
+  void _refreshUserList() {
+    setState(() {});
   }
 
   Future<void> _loadAdminData() async {
@@ -124,7 +121,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   Future<void> _signOut() async {
     try {
-      await logout(); // This handles Firestore update and sign out
+      await logout();
       if (mounted) {
         Navigator.pushReplacementNamed(context, '/login');
       }
@@ -160,7 +157,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             content: Text('Do you really want to close the app?'),
             backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
             ),
             actions: [
               TextButton(
@@ -177,228 +174,301 @@ class _AdminDashboardState extends State<AdminDashboard> {
         return shouldExit ?? false;
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(200.0), // Adjust height as needed
-          child: ClipPath(
-            clipper: CurvedBottomClipper(),
-            child: Container(
-              color: Colors.red[600],
-              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-              child: SafeArea(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 80.0),
-                      child: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _isSearching = !_isSearching;
-                            if (!_isSearching) {
-                              _searchController.clear();
-                              _filteredActions = _allActions;
-                            }
-                          });
-                        },
-                        icon: Icon(Icons.search, color: Colors.white),
-                      ),
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: _isSearching
-                            ? Padding(
-                                padding: const EdgeInsets.only(
-                                    bottom: 45.0, left: 20),
-                                child: TextField(
-                                  controller: _searchController,
-                                  autofocus: true,
-                                  onChanged: _filterSearch,
-                                  decoration: InputDecoration(
-                                    hintText: 'Search actions...',
-                                    hintStyle: TextStyle(color: Colors.white70),
-                                    border: InputBorder.none,
-                                  ),
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              )
-                            : Padding(
-                                padding: const EdgeInsets.only(bottom: 80.0),
-                                child: Text(
-                                  'Admin Dashboard',
-                                  style: GoogleFonts.oswald(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 30),
-                                ),
-                              ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 90.0),
-                      child: IconButton(
-                        icon: Icon(Icons.logout, color: Colors.white),
-                        tooltip: 'Sign Out',
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                backgroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                title: Text(
-                                  'Confirm Logout',
-                                  style: TextStyle(
-                                    fontFamily: 'Roboto',
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                content:
-                                    Text('Are you sure you want to log out?'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(),
-                                    child: Text(
-                                      'Cancel',
-                                      style: TextStyle(color: Colors.red[600]),
-                                    ),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                      _signOut();
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red[600],
-                                      foregroundColor: Colors.white,
-                                    ),
-                                    child: Text('Logout'),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+        backgroundColor: Color(0xFFF5F5F7),
+        body: Stack(
+          children: [
+            // Top curved container
+            Container(
+              height: MediaQuery.of(context).size.height * 0.40,
+              decoration: BoxDecoration(
+                color: Colors.red[600],
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30),
                 ),
               ),
             ),
-          ),
-        ),
-        body: Container(
-          color: Colors.white,
-          child: SingleChildScrollView(
-            physics: BouncingScrollPhysics(),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+
+            // Main content
+            SafeArea(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+                  // App bar with profile and search
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        CircleAvatar(
-                          radius: 40,
-                          backgroundColor: Colors.red[200],
-                          child: Icon(
-                            Icons.person,
-                            size: 40,
-                            color: Colors.red[800],
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        Container(
-                          padding: EdgeInsets.all(16.0),
-                          margin: EdgeInsets.symmetric(vertical: 8.0),
-                          decoration: BoxDecoration(
-                            color: Colors.red[100],
-                            borderRadius: BorderRadius.circular(12.0),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.2),
-                                blurRadius: 6,
-                                spreadRadius: 1,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Text(
-                            'Welcome, ${_adminEmail ?? 'Admin'}!',
-                            style: TextStyle(
-                              fontFamily: 'Roboto',
-                              fontSize: 20,
+                        Text(
+                          "ADMIN DASHBOARD",
+                          style: GoogleFonts.oswald(
+                              color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              color: Colors.red[800],
+                              fontSize: 25),
+                        ),
+                        CircleAvatar(
+                          backgroundColor: Colors.white.withOpacity(0.3),
+                          radius: 20,
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.logout,
+                              color: Colors.white,
+                              size: 22,
                             ),
-                            textAlign: TextAlign.center,
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    title: Text(
+                                      'Confirm Logout',
+                                      style: TextStyle(
+                                        fontFamily: 'Roboto',
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    content: Text(
+                                        'Are you sure you want to log out?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(),
+                                        child: Text(
+                                          'Cancel',
+                                          style:
+                                              TextStyle(color: Colors.red[600]),
+                                        ),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          _signOut();
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red[600],
+                                          foregroundColor: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        child: Text('Logout'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
                           ),
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Manage Your Gallery:',
-                    style: TextStyle(
-                      fontFamily: 'Roboto',
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black,
+
+                  // Search bar
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 16),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.red[800]!.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: _filterSearch,
+                        style: TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: 'Search...',
+                          hintStyle: TextStyle(color: Colors.white70),
+                          prefixIcon: Icon(Icons.search, color: Colors.white70),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(vertical: 15),
+                        ),
+                      ),
                     ),
                   ),
-                  SizedBox(height: 16),
-                  _filteredActions.isEmpty
-                      ? Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(32.0),
-                            child: Text(
-                              'No matching actions found.',
-                              style: TextStyle(
-                                fontFamily: 'Roboto',
-                                fontSize: 16,
-                                color: Colors.grey[600],
+
+                  // Admin info card
+                  Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    child: Container(
+                      padding: EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.indigo[900],
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            spreadRadius: 1,
+                            blurRadius: 10,
+                            offset: Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.person,
+                                color: Colors.pink[100],
+                                size: 28,
+                              ),
+                              SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Welcome, ${_adminEmail ?? 'Admin'}!',
+                                    style: TextStyle(
+                                      fontFamily: 'Roboto',
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 12),
+                          LinearProgressIndicator(
+                            value: 0.75,
+                            backgroundColor: Colors.white30,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.indigo[400]!),
+                          ),
+                          SizedBox(height: 8),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Main content grid
+                  Expanded(
+                    child: Container(
+                      margin: EdgeInsets.only(top: 16),
+                      padding: EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(32),
+                          topRight: Radius.circular(32),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            spreadRadius: 1,
+                            blurRadius: 10,
+                            offset: Offset(0, -5),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: GridView.count(
+                              crossAxisCount: 3,
+                              crossAxisSpacing: 16.0,
+                              mainAxisSpacing: 16.0,
+                              physics: BouncingScrollPhysics(),
+                              children: _filteredActions.map((action) {
+                                return _buildActionCard(
+                                  context,
+                                  icon: action['icon'] as IconData,
+                                  title: action['title'] as String,
+                                  subtitle: action['subtitle'] as String,
+                                  onTap: () {
+                                    final Function(BuildContext) onTapFn =
+                                        action['onTap'] as Function(
+                                            BuildContext);
+                                    onTapFn(context);
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Bottom navigation
+                  Container(
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          spreadRadius: 1,
+                          blurRadius: 10,
+                          offset: Offset(0, -2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                spreadRadius: 2,
+                                blurRadius: 8,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: InkWell(
+                              onTap: _refreshUserList,
+                              borderRadius: BorderRadius.circular(
+                                  100), // to match the circle
+                              child: Container(
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.indigo,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.sync_outlined,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
                               ),
                             ),
                           ),
-                        )
-                      : GridView.count(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 16.0,
-                          mainAxisSpacing: 16.0,
-                          childAspectRatio: 1.0,
-                          physics: NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          children: _filteredActions.map((action) {
-                            return _buildActionTile(
-                              context,
-                              icon: action['icon'] as IconData,
-                              title: action['title'] as String,
-                              subtitle: action['subtitle'] as String,
-                              onTap: () {
-                                final Function(BuildContext) onTapFn =
-                                    action['onTap'] as Function(BuildContext);
-                                onTapFn(context);
-                              },
-                            );
-                          }).toList(),
                         ),
-                  SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildActionTile(
+  Widget _buildActionCard(
     BuildContext context, {
     required IconData icon,
     required String title,
@@ -407,16 +477,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 200),
+      child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              blurRadius: 6,
+              color: Colors.black.withOpacity(0.05),
               spreadRadius: 1,
+              blurRadius: 5,
               offset: Offset(0, 2),
             ),
           ],
@@ -425,122 +494,60 @@ class _AdminDashboardState extends State<AdminDashboard> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 50,
-              height: 50,
+              padding: EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.red[600],
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.red.withOpacity(0.3),
-                    blurRadius: 6,
-                    spreadRadius: 1,
-                  ),
-                ],
+                color: _getIconBackgroundColor(title),
+                borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(icon, size: 24, color: Colors.white),
+              child: Icon(
+                icon,
+                size: 24,
+                color: _getIconColor(title),
+              ),
             ),
-            SizedBox(height: 12),
+            SizedBox(height: 10),
             Text(
-              title,
-              style: TextStyle(
-                fontFamily: 'Roboto',
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
+              title.split(' ')[0],
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            SizedBox(height: 8),
-            SubtitleWithAnimation(
-              text: subtitle,
+            Text(
+              subtitle,
+              style: GoogleFonts.poppins(
+                fontSize: 10,
+                color: Colors.grey,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
       ),
     );
   }
-}
 
-class SubtitleWithAnimation extends StatefulWidget {
-  final String text;
-
-  const SubtitleWithAnimation({
-    Key? key,
-    required this.text,
-  }) : super(key: key);
-
-  @override
-  _SubtitleWithAnimationState createState() => _SubtitleWithAnimationState();
-}
-
-class _SubtitleWithAnimationState extends State<SubtitleWithAnimation>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<Offset> _slideAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.5), // Start slightly below
-      end: const Offset(0, 0), // End at original position
-    ).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-    _controller.repeat(reverse: true);
+  // Helper methods for icon colors to match the design
+  Color _getIconBackgroundColor(String title) {
+    if (title.contains('Categories')) return Colors.amber[100]!;
+    if (title.contains('Images')) return Colors.amber[100]!;
+    if (title.contains('List')) return Colors.blue[100]!;
+    if (title.contains('Users')) return Colors.red[100]!;
+    if (title.contains('Subscriptions')) return Colors.purple[100]!;
+    return Colors.teal[100]!;
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  Color _getIconColor(String title) {
+    if (title.contains('Categories')) return Colors.amber[800]!;
+    if (title.contains('Images')) return Colors.amber[800]!;
+    if (title.contains('List')) return Colors.blue[800]!;
+    if (title.contains('Users')) return Colors.red[800]!;
+    if (title.contains('Subscriptions')) return Colors.purple[800]!;
+    return Colors.teal[800]!;
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return SlideTransition(
-      position: _slideAnimation,
-      child: Text(
-        widget.text,
-        textAlign: TextAlign.center,
-        style: const TextStyle(
-          fontFamily: 'Roboto',
-          fontSize: 12,
-          color: Colors.black,
-        ),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-      ),
-    );
-  }
-}
-
-class CurvedBottomClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    var path = Path();
-
-    final p0 = size.height * 0.75;
-    path.lineTo(0.0, p0);
-
-    final controlPoint = Offset(size.width * 0.5, size.height);
-    final endPoint = Offset(size.width + 50, size.height / 3);
-    path.quadraticBezierTo(
-        controlPoint.dx, controlPoint.dy, endPoint.dx, endPoint.dy);
-
-    path.lineTo(size.width, 0.0);
-    path.close();
-
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
 }
