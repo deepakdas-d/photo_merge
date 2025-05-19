@@ -1,0 +1,2 @@
+D:/PhotoMerge/PhotoMerge-main/android/app/.cxx/Debug/3g46m543/x86/CMakeFiles/edit_cache.dir
+D:/PhotoMerge/PhotoMerge-main/android/app/.cxx/Debug/3g46m543/x86/CMakeFiles/rebuild_cache.dir
