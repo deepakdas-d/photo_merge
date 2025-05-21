@@ -28,9 +28,12 @@ import 'package:photomerge/User/View/provider/userprovider.dart';
 import 'package:photomerge/User/View/support.dart';
 import 'package:photomerge/User/View/usersubscription.dart';
 import 'package:provider/provider.dart';
+import 'package:audio_service/audio_service.dart';
 
+late final AudioHandler audioHandler;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp();
   await AwesomeNotifications().initialize(
     null, // Default icon
@@ -45,6 +48,21 @@ void main() async {
       ),
     ],
   );
+  try {
+    debugPrint('main: Initializing AudioService...');
+    audioHandler = await AudioService.init(
+      builder: () => VideoAudioHandler(),
+      config: const AudioServiceConfig(
+        androidNotificationChannelId: 'com.photomerge.video_channel',
+        androidNotificationChannelName: 'Video Playback',
+        androidNotificationOngoing: true,
+        androidShowNotificationBadge: true,
+      ),
+    );
+    debugPrint('main: AudioService initialized');
+  } catch (e) {
+    debugPrint('main: AudioService init error: $e');
+  }
   runApp(
     MultiProvider(
       providers: [
@@ -125,5 +143,66 @@ class LoadingOverlay extends StatelessWidget {
           ),
       ],
     );
+  }
+}
+
+class VideoAudioHandler extends BaseAudioHandler {
+  VideoAudioHandler() {
+    debugPrint('VideoAudioHandler: Initialized');
+  }
+
+  @override
+  Future<void> play() async {
+    debugPrint('VideoAudioHandler: play() called');
+    playbackState.add(playbackState.value.copyWith(
+      playing: true,
+      controls: [MediaControl.pause, MediaControl.stop],
+    ));
+  }
+
+  @override
+  Future<void> pause() async {
+    debugPrint('VideoAudioHandler: pause() called');
+    playbackState.add(playbackState.value.copyWith(
+      playing: false,
+      controls: [MediaControl.play, MediaControl.stop],
+    ));
+  }
+
+  @override
+  Future<void> stop() async {
+    debugPrint('VideoAudioHandler: stop() called');
+    playbackState.add(playbackState.value.copyWith(
+      playing: false,
+      processingState: AudioProcessingState.idle,
+    ));
+  }
+
+  @override
+  Future<void> updateMediaItem(MediaItem item) async {
+    mediaItem.add(item);
+  }
+
+  @override
+  Future<void> onTaskRemoved() async {
+    debugPrint('VideoAudioHandler: onTaskRemoved');
+    await stop();
+  }
+
+  @override
+  Future<void> onNotificationClicked(bool show) async {
+    debugPrint('VideoAudioHandler: Notification clicked, show=$show');
+  }
+
+  @override
+  Future<void> onMediaButtonEvent(MediaButton button) async {
+    debugPrint('VideoAudioHandler: MediaButton event: $button');
+
+    // Only one case exists currently: MediaButton.media
+    if (playbackState.value.playing) {
+      await pause();
+    } else {
+      await play();
+    }
   }
 }

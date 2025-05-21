@@ -60,7 +60,9 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   animate_do: ^4.2.0
   intl: ^0.20.2
-
+  audio_service: ^0.18.18
+  audio_session: ^0.2.2
+  youtube_player_iframe: ^5.2.1
 
 
 dev_dependencies:
