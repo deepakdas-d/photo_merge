@@ -65,10 +65,10 @@ class _AdminImageUploadPageState extends State<AdminImageUploadPage> {
 
       final resizedBytes = img.encodeJpg(resized); // encode back to JPEG
 
-      final url = Uri.parse('https://api.cloudinary.com/v1_1/dfchqxsdz/upload');
+      final url = Uri.parse('https://api.cloudinary.com/v1_1/dlacr6mpw/upload');
       final request = http.MultipartRequest('POST', url);
 
-      request.fields['upload_preset'] = 'TempApp';
+      request.fields['upload_preset'] = 'BrandBuilder';
 
       request.files.add(http.MultipartFile.fromBytes(
         'file',

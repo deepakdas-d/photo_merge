@@ -95,7 +95,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => AuthWrapper(),
         '/signup': (context) => SignupPage(),
         '/login': (context) => LoginPage(),
-        '/user': (context) => UserDashboardContent(),
+        '/user': (context) => UserDashboard(),
         '/admin': (context) => AdminDashboard(),
         '/profile': (context) => ProfilePage(),
         '/createadmin': (context) => create_admin(),

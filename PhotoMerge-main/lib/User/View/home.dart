@@ -14,14 +14,14 @@ import 'package:photomerge/User/View/provider/recentimage_provider.dart';
 import 'package:photomerge/User/View/provider/userprovider.dart';
 import 'package:provider/provider.dart';
 
-class UserDashboardContent extends StatefulWidget {
-  const UserDashboardContent({super.key});
+class UserDashboard extends StatefulWidget {
+  const UserDashboard({super.key});
 
   @override
-  State<UserDashboardContent> createState() => _UserDashboardContentState();
+  State<UserDashboard> createState() => _UserDashboardState();
 }
 
-class _UserDashboardContentState extends State<UserDashboardContent> {
+class _UserDashboardState extends State<UserDashboard> {
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -952,13 +952,13 @@ class GallerySearchDelegate extends SearchDelegate {
   ThemeData appBarTheme(BuildContext context) {
     return ThemeData(
       appBarTheme: AppBarTheme(
-        backgroundColor: _UserDashboardContentState.primaryColor,
-        foregroundColor: _UserDashboardContentState.textColor,
+        backgroundColor: _UserDashboardState.primaryColor,
+        foregroundColor: _UserDashboardState.textColor,
         elevation: 0,
       ),
       inputDecorationTheme: InputDecorationTheme(
         hintStyle: TextStyle(
-          color: _UserDashboardContentState.textColor.withOpacity(0.6),
+          color: _UserDashboardState.textColor.withOpacity(0.6),
           fontWeight: FontWeight.normal,
         ),
         border: InputBorder.none,
@@ -972,7 +972,7 @@ class GallerySearchDelegate extends SearchDelegate {
   List<Widget> buildActions(BuildContext context) {
     return [
       IconButton(
-        icon: Icon(Icons.clear, color: _UserDashboardContentState.textColor),
+        icon: Icon(Icons.clear, color: _UserDashboardState.textColor),
         onPressed: () {
           query = '';
         },
@@ -983,7 +983,7 @@ class GallerySearchDelegate extends SearchDelegate {
   @override
   Widget buildLeading(BuildContext context) {
     return IconButton(
-      icon: Icon(Icons.arrow_back, color: _UserDashboardContentState.textColor),
+      icon: Icon(Icons.arrow_back, color: _UserDashboardState.textColor),
       onPressed: () {
         close(context, null);
       },
@@ -1003,12 +1003,12 @@ class GallerySearchDelegate extends SearchDelegate {
   Widget _buildSearchResults(BuildContext context) {
     if (query.isEmpty) {
       return Container(
-        color: _UserDashboardContentState.secondaryColor,
+        color: _UserDashboardState.secondaryColor,
         child: Center(
           child: Text(
             'Enter a search term',
             style: TextStyle(
-              color: _UserDashboardContentState.textColor.withOpacity(0.7),
+              color: _UserDashboardState.textColor.withOpacity(0.7),
               fontSize: 16,
               fontWeight: FontWeight.w400,
             ),
@@ -1018,7 +1018,7 @@ class GallerySearchDelegate extends SearchDelegate {
     }
 
     return Container(
-      color: _UserDashboardContentState.secondaryColor,
+      color: _UserDashboardState.secondaryColor,
       child: Consumer<CategoriesProvider>(
         builder: (context, provider, child) {
           if (provider.errorMessage != null) {
@@ -1026,7 +1026,7 @@ class GallerySearchDelegate extends SearchDelegate {
               child: Text(
                 'Error loading suggestions',
                 style: TextStyle(
-                  color: _UserDashboardContentState.textColor,
+                  color: _UserDashboardState.textColor,
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
                 ),
@@ -1038,7 +1038,7 @@ class GallerySearchDelegate extends SearchDelegate {
               child: Text(
                 'No suggestions found',
                 style: TextStyle(
-                  color: _UserDashboardContentState.textColor.withOpacity(0.7),
+                  color: _UserDashboardState.textColor.withOpacity(0.7),
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
                 ),
@@ -1057,7 +1057,7 @@ class GallerySearchDelegate extends SearchDelegate {
               child: Text(
                 'No suggestions found',
                 style: TextStyle(
-                  color: _UserDashboardContentState.textColor.withOpacity(0.7),
+                  color: _UserDashboardState.textColor.withOpacity(0.7),
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
                 ),
@@ -1087,14 +1087,14 @@ class GallerySearchDelegate extends SearchDelegate {
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) => Icon(
                               Icons.category,
-                              color: _UserDashboardContentState.accentColor,
+                              color: _UserDashboardState.accentColor,
                               size: 40,
                             ),
                           ),
                         )
                       : Icon(
                           Icons.category,
-                          color: _UserDashboardContentState.accentColor,
+                          color: _UserDashboardState.accentColor,
                           size: 40,
                         ),
                   title: Text(
@@ -1102,7 +1102,7 @@ class GallerySearchDelegate extends SearchDelegate {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: _UserDashboardContentState.textColor,
+                      color: _UserDashboardState.textColor,
                     ),
                   ),
                   onTap: () {

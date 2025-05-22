@@ -77,10 +77,10 @@ class _AddImagePageState extends State<AddImagePage> {
 
   Future<String?> _uploadToCloudinary(File image) async {
     try {
-      final url = Uri.parse('https://api.cloudinary.com/v1_1/dfchqxsdz/upload');
+      final url = Uri.parse('https://api.cloudinary.com/v1_1/dlacr6mpw/upload');
       final request = http.MultipartRequest('POST', url);
 
-      request.fields['upload_preset'] = 'TempApp';
+      request.fields['upload_preset'] = 'BrandBuilder';
       request.files.add(await http.MultipartFile.fromPath('file', image.path));
 
       final response = await request.send();

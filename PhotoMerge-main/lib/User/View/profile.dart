@@ -1,12 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:photomerge/User/View/home.dart';
+import 'package:uuid/uuid.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart'
+    as flutterSecureStorage;
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -212,9 +217,9 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() => _isSaving = true);
     try {
       final url =
-          Uri.parse('https://api.cloudinary.com/v1_1/dfchqxsdz/image/upload');
+          Uri.parse('https://api.cloudinary.com/v1_1/dlacr6mpw/image/upload');
       final request = http.MultipartRequest('POST', url)
-        ..fields['upload_preset'] = 'TempApp'
+        ..fields['upload_preset'] = 'BrandBuilder'
         ..files.add(await http.MultipartFile.fromPath('file', imageFile.path));
 
       final response =
@@ -232,6 +237,103 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  // Future<void> _updateUserData() async {
+  //   if (!_formKey.currentState!.validate()) return;
+
+  //   final currentUser = _firebaseAuth.currentUser;
+  //   if (currentUser == null) {
+  //     _showSnackBar('No user signed in', isError: true);
+  //     return;
+  //   }
+
+  //   setState(() => _isSaving = true);
+  //   try {
+  //     _userImageUrl = await _uploadImage(_userImage, _userImageUrl);
+  //     _companyLogoUrl = await _uploadImage(_companyLogo, _companyLogoUrl);
+
+  //     final data = {
+  //       'firstName': _firstNameController.text.trim(),
+  //       'lastName': _firstNameController.text.trim(),
+  //       'email': _emailController.text.trim(),
+  //       'phone': _phoneController.text.trim(),
+  //       'companyName': _companyNameController.text.trim(),
+  //       'designation': _designationController.text.trim(),
+  //       'companyWebsite': _websiteController.text.trim(),
+  //       'district': _districtController.text.trim(),
+  //       'branch': _branchController.text.trim(),
+  //       'userImage': _userImageUrl ?? '',
+  //       'companyLogo': _companyLogoUrl ?? '',
+  //       'updatedAt': FieldValue.serverTimestamp(),
+  //     };
+
+  //     // Check if all required fields are non-empty
+  //     bool isProfileComplete = _firstNameController.text.trim().isNotEmpty &&
+  //         _lastNameController.text.trim().isNotEmpty &&
+  //         _emailController.text.trim().isNotEmpty &&
+  //         _phoneController.text.trim().isNotEmpty &&
+  //         _companyNameController.text.trim().isNotEmpty &&
+  //         _designationController.text.trim().isNotEmpty &&
+  //         _districtController.text.trim().isNotEmpty &&
+  //         _branchController.text.trim().isNotEmpty &&
+  //         (_userImageUrl?.isNotEmpty ?? false) &&
+  //         (_companyLogoUrl?.isNotEmpty ?? false);
+
+  //     // Update user_profile collection
+  //     await _firestore
+  //         .collection('user_profile')
+  //         .doc(currentUser.uid)
+  //         .set(data, SetOptions(merge: true));
+
+  //     // Update users collection with profile_status
+  //     await _firestore.collection('users').doc(currentUser.uid).set({
+  //       'email': _emailController.text.trim(),
+  //       'phone': _phoneController.text.trim(),
+  //       'isActive': true,
+  //       'role': 'user',
+  //       'profile_status': isProfileComplete, // Update profile_status
+  //     }, SetOptions(merge: true));
+
+  //     if (mounted) {
+  //       _showSnackBar('Profile updated successfully');
+  //       Navigator.pushReplacement(
+  //           context, MaterialPageRoute(builder: (context) => UserDashboard()));
+  //     }
+  //   } catch (e) {
+  //     if (mounted) {
+  //       _showSnackBar('Error updating profile: $e', isError: true);
+  //     }
+  //   } finally {
+  //     if (mounted) setState(() => _isSaving = false);
+  //   }
+  // }
+  Future<String> _getDeviceId() async {
+    try {
+      DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+
+      if (Platform.isAndroid) {
+        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+        return androidInfo.id;
+      } else if (Platform.isIOS) {
+        IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+        return iosInfo.identifierForVendor!;
+      } else if (kIsWeb) {
+        const storage = flutterSecureStorage.FlutterSecureStorage();
+        String? deviceId = await storage.read(key: 'device_id');
+
+        if (deviceId == null) {
+          deviceId = Uuid().v4();
+          await storage.write(key: 'device_id', value: deviceId);
+        }
+
+        return deviceId;
+      }
+
+      return 'unknown_device';
+    } catch (e) {
+      return DateTime.now().millisecondsSinceEpoch.toString();
+    }
+  }
+
   Future<void> _updateUserData() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -246,9 +348,14 @@ class _ProfilePageState extends State<ProfilePage> {
       _userImageUrl = await _uploadImage(_userImage, _userImageUrl);
       _companyLogoUrl = await _uploadImage(_companyLogo, _companyLogoUrl);
 
-      final data = {
+      // Get current device ID
+      final String deviceId =
+          await _getDeviceId(); // Add _getDeviceId method (see below)
+
+      final profileData = {
         'firstName': _firstNameController.text.trim(),
-        'lastName': _firstNameController.text.trim(),
+        'lastName':
+            _lastNameController.text.trim(), // Fixed: Use _lastNameController
         'email': _emailController.text.trim(),
         'phone': _phoneController.text.trim(),
         'companyName': _companyNameController.text.trim(),
@@ -277,21 +384,23 @@ class _ProfilePageState extends State<ProfilePage> {
       await _firestore
           .collection('user_profile')
           .doc(currentUser.uid)
-          .set(data, SetOptions(merge: true));
+          .set(profileData, SetOptions(merge: true));
 
-      // Update users collection with profile_status
+      // Update users collection with profile_status and preserve deviceId
       await _firestore.collection('users').doc(currentUser.uid).set({
         'email': _emailController.text.trim(),
         'phone': _phoneController.text.trim(),
         'isActive': true,
         'role': 'user',
-        'profile_status': isProfileComplete, // Update profile_status
+        'profile_status': isProfileComplete,
+        'deviceId': deviceId, // Preserve deviceId
+        'isLoggedIn': true, // Preserve login status
       }, SetOptions(merge: true));
 
       if (mounted) {
         _showSnackBar('Profile updated successfully');
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => UserDashboardContent()));
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => UserDashboard()));
       }
     } catch (e) {
       if (mounted) {
@@ -401,7 +510,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             _districtController),
                         _buildTextField(
                             'Branch', Icons.store, _branchController),
-                        _buildTextField(
+                        _buildweb(
                           'Website',
                           Icons.link,
                           _websiteController,
@@ -540,6 +649,40 @@ class _ProfilePageState extends State<ProfilePage> {
           }
           return null;
         },
+      ),
+    );
+  }
+
+  Widget _buildweb(
+    String label,
+    IconData icon,
+    TextEditingController controller, {
+    TextInputType type = TextInputType.text,
+    String? prefix,
+    bool? overrideEnabled,
+  }) {
+    final isEnabled = overrideEnabled ?? _isEditing;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: type,
+        enabled: isEnabled,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixText: prefix,
+          prefixIcon:
+              Icon(icon, color: isEnabled ? primaryColor : textSecondaryColor),
+          suffixIcon: isEnabled && controller.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 20),
+                  onPressed: () => controller.clear(),
+                  color: textSecondaryColor,
+                )
+              : null,
+        ),
+        style: GoogleFonts.poppins(
+            fontSize: 14, color: isEnabled ? textColor : textSecondaryColor),
       ),
     );
   }

@@ -197,7 +197,7 @@ class _ImageDetailViewState extends State<ImageDetailView>
 
       bool hasActiveSubscription = isSubscribed && subscriptionExpiry != null;
       if (hasActiveSubscription &&
-          !subscriptionExpiry!.toDate().isAfter(DateTime.now())) {
+          !subscriptionExpiry.toDate().isAfter(DateTime.now())) {
         await _firestore.collection('users').doc(userId).update({
           'isSubscribed': false,
         });
@@ -418,8 +418,8 @@ class _ImageDetailViewState extends State<ImageDetailView>
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Container(
-                                width: 78, // Reduced from 58
-                                height: 78, // Reduced from 68
+                                width: 82,
+                                height: 85,
                                 decoration: BoxDecoration(
                                   borderRadius:
                                       BorderRadius.circular(4), // Adjusted
@@ -494,7 +494,7 @@ class _ImageDetailViewState extends State<ImageDetailView>
                                           'No designation',
                                       style: const TextStyle(
                                         fontSize: 11, // Reduced from 12
-                                        color: Colors.white70,
+                                        color: Colors.white,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -503,7 +503,7 @@ class _ImageDetailViewState extends State<ImageDetailView>
                                       userData!['phone'] ?? 'No Number',
                                       style: const TextStyle(
                                         fontSize: 11, // Reduced from 12
-                                        color: Colors.white70,
+                                        color: Colors.white,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -511,8 +511,8 @@ class _ImageDetailViewState extends State<ImageDetailView>
                                     Text(
                                       userData!['email'] ?? 'No email',
                                       style: const TextStyle(
-                                        fontSize: 11, // Reduced from 12
-                                        color: Colors.white70,
+                                        fontSize: 10, // Reduced from 12
+                                        color: Colors.white,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -655,7 +655,7 @@ class _ImageDetailViewState extends State<ImageDetailView>
 
       bool hasActiveSubscription = isSubscribed && subscriptionExpiry != null;
       if (hasActiveSubscription &&
-          !subscriptionExpiry!.toDate().isAfter(DateTime.now())) {
+          !subscriptionExpiry.toDate().isAfter(DateTime.now())) {
         await _firestore.collection('users').doc(userId).update({
           'isSubscribed': false,
         });
@@ -825,9 +825,9 @@ class _ImageDetailViewState extends State<ImageDetailView>
 
   Future<void> _redirectToWhatsApp(
       String plan, int price, String duration) async {
-    const adminWhatsAppNumber = '+919567725398';
+    const adminWhatsAppNumber = '+918075601175';
     final message =
-        'Hello, I want to subscribe to the $plan (\₹$price/$duration) for the PhotoMerge app.';
+        'Hello, I want to subscribe to the $plan (\₹$price/$duration) for the BrandBuilder app.';
     final encodedMessage = Uri.encodeComponent(message);
 
     final whatsappUrl =
@@ -892,7 +892,7 @@ class _ImageDetailViewState extends State<ImageDetailView>
         automaticallyImplyLeading: false,
         leading: IconButton(
           onPressed: () {
-            Navigator.push(
+            Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) => ListImages(),

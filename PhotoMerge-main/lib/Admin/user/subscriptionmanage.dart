@@ -93,52 +93,18 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
             name: 'Standard Plan',
             duration: const Duration(days: 30),
             price: 300,
-            features: [
-              'Download watermark-free images',
-              'Access to all subcategories'
-            ],
+            features: ['Access to all fetaures for 1 month'],
             categorySpecific: true,
           ),
           SubscriptionPlan(
             name: 'Premium Plan',
             duration: const Duration(days: 365),
             price: 1000,
-            features: [
-              'Download watermark-free images',
-              'Access to all subcategories',
-              'Priority customer support',
-              'Early access to new features'
-            ],
+            features: ['Access to all fetaures for 1 year'],
             categorySpecific: true,
           ),
         ];
       }
-
-      // Add universal plan options
-      _categoryPlans['Universal'] = [
-        SubscriptionPlan(
-          name: 'Universal Standard',
-          duration: const Duration(days: 30),
-          price: 500,
-          features: [
-            'Access to all categories',
-            'Download watermark-free images'
-          ],
-          categorySpecific: false,
-        ),
-        SubscriptionPlan(
-          name: 'Universal Premium',
-          duration: const Duration(days: 365),
-          price: 1800,
-          features: [
-            'Access to all categories',
-            'Download watermark-free images',
-            'Priority customer support',
-            'Early access to new features'
-          ],
-          categorySpecific: false,
-        ),
-      ];
 
       // Add Universal to the list of categories
       categories.add('Universal');
@@ -306,308 +272,517 @@ class _AdminSubscriptionPageState extends State<AdminSubscriptionPage> {
     );
   }
 
+  // void _approveSubscription(BuildContext context, String userId, String email) {
+  //   String selectedCategory = _categories.isNotEmpty ? _categories[0] : '';
+
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => StatefulBuilder(
+  //       builder: (context, setState) => Dialog(
+  //         shape:
+  //             RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  //         elevation: 5,
+  //         child: Container(
+  //           constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+  //           padding: const EdgeInsets.all(20),
+  //           child: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             crossAxisAlignment: CrossAxisAlignment.stretch,
+  //             children: [
+  //               // Header with gradient background
+  //               Container(
+  //                 padding: const EdgeInsets.symmetric(vertical: 12),
+  //                 decoration: BoxDecoration(
+  //                   borderRadius: const BorderRadius.only(
+  //                     topLeft: Radius.circular(16),
+  //                     topRight: Radius.circular(16),
+  //                   ),
+  //                   gradient: LinearGradient(
+  //                     colors: [Color(0xFF00B6B0), Color(0xFFE0F7F6)],
+  //                     begin: Alignment.topLeft,
+  //                     end: Alignment.bottomRight,
+  //                   ),
+  //                 ),
+  //                 child: Row(
+  //                   mainAxisAlignment: MainAxisAlignment.center,
+  //                   children: [
+  //                     const Icon(Icons.verified_user,
+  //                         color: Colors.white, size: 28),
+  //                     const SizedBox(width: 12),
+  //                     Text(
+  //                       'Approve Subscription',
+  //                       style:
+  //                           Theme.of(context).textTheme.headlineSmall?.copyWith(
+  //                                 color: Colors.white,
+  //                                 fontWeight: FontWeight.bold,
+  //                                 fontSize: 20,
+  //                               ),
+  //                     ),
+  //                   ],
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 16),
+
+  //               // User info card
+  //               Card(
+  //                 elevation: 2,
+  //                 shape: RoundedRectangleBorder(
+  //                     borderRadius: BorderRadius.circular(12)),
+  //                 child: Padding(
+  //                   padding: const EdgeInsets.all(16),
+  //                   child: Row(
+  //                     children: [
+  //                       CircleAvatar(
+  //                         backgroundColor: Color(0xFFE0F7F6),
+  //                         child: Icon(Icons.person, color: Color(0xFF00B6B0)),
+  //                       ),
+  //                       const SizedBox(width: 16),
+  //                       Expanded(
+  //                         child: Column(
+  //                           crossAxisAlignment: CrossAxisAlignment.start,
+  //                           children: [
+  //                             Text(
+  //                               'Subscriber',
+  //                               style: TextStyle(
+  //                                 fontSize: 12,
+  //                                 color: Colors.grey[600],
+  //                               ),
+  //                             ),
+  //                             Text(
+  //                               email,
+  //                               style: const TextStyle(
+  //                                 fontSize: 16,
+  //                                 fontWeight: FontWeight.w500,
+  //                               ),
+  //                             ),
+  //                           ],
+  //                         ),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 16),
+
+  //               // Category selector if needed
+  //               // You could add a category dropdown here
+
+  //               const Text(
+  //                 'Select Plan:',
+  //                 style: TextStyle(
+  //                   fontSize: 16,
+  //                   fontWeight: FontWeight.bold,
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 8),
+
+  //               // Plans list
+  //               Expanded(
+  //                 child: _categoryPlans[selectedCategory]?.isEmpty ?? true
+  //                     ? Center(
+  //                         child: Text(
+  //                           'No plans available for this category',
+  //                           style: TextStyle(color: Colors.grey[600]),
+  //                         ),
+  //                       )
+  //                     : ListView.builder(
+  //                         itemCount:
+  //                             _categoryPlans[selectedCategory]?.length ?? 0,
+  //                         itemBuilder: (context, index) {
+  //                           final plan =
+  //                               _categoryPlans[selectedCategory]![index];
+  //                           final durationText = plan.duration.inDays >= 365
+  //                               ? '${plan.duration.inDays ~/ 365} year${plan.duration.inDays >= 730 ? 's' : ''}'
+  //                               : '${plan.duration.inDays} days';
+
+  //                           final isRecommended = index ==
+  //                               1; // Example: Mark the middle option as recommended
+
+  //                           return Card(
+  //                             elevation: 2,
+  //                             margin: const EdgeInsets.symmetric(vertical: 8),
+  //                             shape: RoundedRectangleBorder(
+  //                               borderRadius: BorderRadius.circular(12),
+  //                               side: isRecommended
+  //                                   ? BorderSide(
+  //                                       color: Color(0xFF00B6B0), width: 2)
+  //                                   : BorderSide.none,
+  //                             ),
+  //                             child: Stack(
+  //                               children: [
+  //                                 if (isRecommended)
+  //                                   Positioned(
+  //                                     top: 0,
+  //                                     right: 0,
+  //                                     child: Container(
+  //                                       padding: const EdgeInsets.symmetric(
+  //                                           horizontal: 8, vertical: 4),
+  //                                       decoration: BoxDecoration(
+  //                                         color: Color(0xFF00B6B0),
+  //                                         borderRadius: const BorderRadius.only(
+  //                                           topRight: Radius.circular(12),
+  //                                           bottomLeft: Radius.circular(12),
+  //                                         ),
+  //                                       ),
+  //                                       child: const Text(
+  //                                         'RECOMMENDED',
+  //                                         style: TextStyle(
+  //                                           color: Colors.white,
+  //                                           fontSize: 10,
+  //                                           fontWeight: FontWeight.bold,
+  //                                         ),
+  //                                       ),
+  //                                     ),
+  //                                   ),
+  //                                 Padding(
+  //                                   padding: const EdgeInsets.all(16),
+  //                                   child: Column(
+  //                                     crossAxisAlignment:
+  //                                         CrossAxisAlignment.start,
+  //                                     children: [
+  //                                       Row(
+  //                                         children: [
+  //                                           Expanded(
+  //                                             child: Column(
+  //                                               crossAxisAlignment:
+  //                                                   CrossAxisAlignment.start,
+  //                                               children: [
+  //                                                 Text(
+  //                                                   plan.name,
+  //                                                   style: const TextStyle(
+  //                                                     fontSize: 18,
+  //                                                     fontWeight:
+  //                                                         FontWeight.bold,
+  //                                                   ),
+  //                                                 ),
+  //                                                 const SizedBox(height: 4),
+  //                                                 Row(
+  //                                                   children: [
+  //                                                     Text(
+  //                                                       '₹${plan.price}',
+  //                                                       style: TextStyle(
+  //                                                         fontSize: 20,
+  //                                                         color:
+  //                                                             Color(0xFF00B6B0),
+  //                                                         fontWeight:
+  //                                                             FontWeight.bold,
+  //                                                       ),
+  //                                                     ),
+  //                                                     const SizedBox(width: 4),
+  //                                                     Text(
+  //                                                       '/ $durationText',
+  //                                                       style: TextStyle(
+  //                                                         color:
+  //                                                             Colors.grey[600],
+  //                                                         fontSize: 14,
+  //                                                       ),
+  //                                                     ),
+  //                                                   ],
+  //                                                 ),
+  //                                               ],
+  //                                             ),
+  //                                           ),
+  //                                           ElevatedButton(
+  //                                             style: ElevatedButton.styleFrom(
+  //                                               backgroundColor:
+  //                                                   Color(0xFF00B6B0),
+  //                                               foregroundColor: Colors.white,
+  //                                               padding:
+  //                                                   const EdgeInsets.symmetric(
+  //                                                       horizontal: 20,
+  //                                                       vertical: 12),
+  //                                               shape: RoundedRectangleBorder(
+  //                                                 borderRadius:
+  //                                                     BorderRadius.circular(8),
+  //                                               ),
+  //                                             ),
+  //                                             onPressed: () =>
+  //                                                 _updateSubscription(
+  //                                                     userId,
+  //                                                     email,
+  //                                                     selectedCategory,
+  //                                                     plan),
+  //                                             child: const Text(
+  //                                               'Select',
+  //                                               style: TextStyle(
+  //                                                   fontWeight:
+  //                                                       FontWeight.bold),
+  //                                             ),
+  //                                           ),
+  //                                         ],
+  //                                       ),
+  //                                       const SizedBox(height: 12),
+  //                                       const Divider(),
+  //                                       const SizedBox(height: 8),
+  //                                       const Text(
+  //                                         'Features:',
+  //                                         style: TextStyle(
+  //                                           fontWeight: FontWeight.w500,
+  //                                         ),
+  //                                       ),
+  //                                       const SizedBox(height: 8),
+  //                                       ...plan.features.map((feature) =>
+  //                                           Padding(
+  //                                             padding: const EdgeInsets.only(
+  //                                                 bottom: 6),
+  //                                             child: Row(
+  //                                               crossAxisAlignment:
+  //                                                   CrossAxisAlignment.start,
+  //                                               children: [
+  //                                                 Icon(
+  //                                                   Icons.check_circle,
+  //                                                   color: Color(0xFF00B6B0),
+  //                                                   size: 18,
+  //                                                 ),
+  //                                                 const SizedBox(width: 8),
+  //                                                 Expanded(
+  //                                                   child: Text(
+  //                                                     feature,
+  //                                                     style: const TextStyle(
+  //                                                         fontSize: 14),
+  //                                                   ),
+  //                                                 ),
+  //                                               ],
+  //                                             ),
+  //                                           )),
+  //                                     ],
+  //                                   ),
+  //                                 ),
+  //                               ],
+  //                             ),
+  //                           );
+  //                         },
+  //                       ),
+  //               ),
+
+  //               // Action buttons
+  //               const SizedBox(height: 16),
+  //               Row(
+  //                 mainAxisAlignment: MainAxisAlignment.end,
+  //                 children: [
+  //                   TextButton(
+  //                     style: TextButton.styleFrom(
+  //                       padding: const EdgeInsets.symmetric(
+  //                           horizontal: 20, vertical: 12),
+  //                     ),
+  //                     onPressed: () => Navigator.pop(context),
+  //                     child: Text(
+  //                       'Cancel',
+  //                       style: TextStyle(color: Color(0xFF00B6B0)),
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
   void _approveSubscription(BuildContext context, String userId, String email) {
     String selectedCategory = _categories.isNotEmpty ? _categories[0] : '';
 
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => Dialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 5,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header with gradient background
-                Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 8,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Header
+              Text(
+                'Approve Subscription',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                      fontSize: 20,
                     ),
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF00B6B0), Color(0xFFE0F7F6)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+
+              // User info
+              Row(
+                children: [
+                  const Icon(Icons.person, color: Colors.teal, size: 24),
+                  const SizedBox(width: 8),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.verified_user,
-                          color: Colors.white, size: 28),
-                      const SizedBox(width: 12),
                       Text(
-                        'Approve Subscription',
-                        style:
-                            Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                        'Subscriber',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                      Text(
+                        email,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 16),
+                ],
+              ),
+              const SizedBox(height: 16),
 
-                // User info card
-                Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundColor: Color(0xFFE0F7F6),
-                          child: Icon(Icons.person, color: Color(0xFF00B6B0)),
+              // Plans list
+              Expanded(
+                child: _categoryPlans[selectedCategory]?.isEmpty ?? true
+                    ? Center(
+                        child: Text(
+                          'No plans available',
+                          style: TextStyle(color: Colors.grey[600]),
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Subscriber',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey[600],
+                      )
+                    : ListView.builder(
+                        itemCount:
+                            _categoryPlans[selectedCategory]?.length ?? 0,
+                        itemBuilder: (context, index) {
+                          final plan = _categoryPlans[selectedCategory]![index];
+                          final durationText = plan.duration.inDays >= 365
+                              ? '${plan.duration.inDays ~/ 365} year${plan.duration.inDays >= 730 ? 's' : ''}'
+                              : '${plan.duration.inDays} days';
+
+                          return Card(
+                            margin: const EdgeInsets.symmetric(vertical: 8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 4,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(10),
+                              onTap: () => _updateSubscription(
+                                  userId, email, selectedCategory, plan),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: Colors.grey[200]!),
                                 ),
-                              ),
-                              Text(
-                                email,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Category selector if needed
-                // You could add a category dropdown here
-
-                const Text(
-                  'Select Plan:',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                // Plans list
-                Expanded(
-                  child: _categoryPlans[selectedCategory]?.isEmpty ?? true
-                      ? Center(
-                          child: Text(
-                            'No plans available for this category',
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
-                        )
-                      : ListView.builder(
-                          itemCount:
-                              _categoryPlans[selectedCategory]?.length ?? 0,
-                          itemBuilder: (context, index) {
-                            final plan =
-                                _categoryPlans[selectedCategory]![index];
-                            final durationText = plan.duration.inDays >= 365
-                                ? '${plan.duration.inDays ~/ 365} year${plan.duration.inDays >= 730 ? 's' : ''}'
-                                : '${plan.duration.inDays} days';
-
-                            final isRecommended = index ==
-                                1; // Example: Mark the middle option as recommended
-
-                            return Card(
-                              elevation: 2,
-                              margin: const EdgeInsets.symmetric(vertical: 8),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: isRecommended
-                                    ? BorderSide(
-                                        color: Color(0xFF00B6B0), width: 2)
-                                    : BorderSide.none,
-                              ),
-                              child: Stack(
-                                children: [
-                                  if (isRecommended)
-                                    Positioned(
-                                      top: 0,
-                                      right: 0,
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: Color(0xFF00B6B0),
-                                          borderRadius: const BorderRadius.only(
-                                            topRight: Radius.circular(12),
-                                            bottomLeft: Radius.circular(12),
-                                          ),
-                                        ),
-                                        child: const Text(
-                                          'RECOMMENDED',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Row(
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    plan.name,
-                                                    style: const TextStyle(
-                                                      fontSize: 18,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  Row(
-                                                    children: [
-                                                      Text(
-                                                        '₹${plan.price}',
-                                                        style: TextStyle(
-                                                          fontSize: 20,
-                                                          color:
-                                                              Color(0xFF00B6B0),
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                                      ),
-                                                      const SizedBox(width: 4),
-                                                      Text(
-                                                        '/ $durationText',
-                                                        style: TextStyle(
-                                                          color:
-                                                              Colors.grey[600],
-                                                          fontSize: 14,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ],
+                                            Text(
+                                              plan.name,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.black87,
                                               ),
                                             ),
-                                            ElevatedButton(
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor:
-                                                    Color(0xFF00B6B0),
-                                                foregroundColor: Colors.white,
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 20,
-                                                        vertical: 12),
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
+                                            const SizedBox(height: 4),
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  '₹${plan.price}',
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.teal,
+                                                  ),
                                                 ),
-                                              ),
-                                              onPressed: () =>
-                                                  _updateSubscription(
-                                                      userId,
-                                                      email,
-                                                      selectedCategory,
-                                                      plan),
-                                              child: const Text(
-                                                'Select',
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  '/ $durationText',
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey[600],
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(height: 12),
-                                        const Divider(),
-                                        const SizedBox(height: 8),
-                                        const Text(
-                                          'Features:',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w500,
+                                        ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.teal,
+                                            foregroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 16, vertical: 8),
+                                          ),
+                                          onPressed: () => _updateSubscription(
+                                              userId,
+                                              email,
+                                              selectedCategory,
+                                              plan),
+                                          child: const Text(
+                                            'Select',
+                                            style: TextStyle(fontSize: 12),
                                           ),
                                         ),
-                                        const SizedBox(height: 8),
-                                        ...plan.features.map((feature) =>
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  bottom: 6),
-                                              child: Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Icon(
-                                                    Icons.check_circle,
-                                                    color: Color(0xFF00B6B0),
-                                                    size: 18,
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  Expanded(
-                                                    child: Text(
-                                                      feature,
-                                                      style: const TextStyle(
-                                                          fontSize: 14),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            )),
                                       ],
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 12),
+                                    const Divider(),
+                                    const SizedBox(height: 8),
+                                    ...plan.features.map((feature) => Padding(
+                                          padding:
+                                              const EdgeInsets.only(bottom: 6),
+                                          child: Row(
+                                            children: [
+                                              const Icon(
+                                                  Icons.check_circle_outline,
+                                                  color: Colors.teal,
+                                                  size: 16),
+                                              const SizedBox(width: 6),
+                                              Expanded(
+                                                child: Text(
+                                                  feature,
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.black87,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )),
+                                  ],
+                                ),
                               ),
-                            );
-                          },
-                        ),
-                ),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+              const SizedBox(height: 16),
 
-                // Action buttons
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(color: Color(0xFF00B6B0)),
-                      ),
-                    ),
-                  ],
+              // Cancel button
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.grey[600],
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-              ],
-            ),
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "209905167867",
-    "project_id": "templatesapp-4dd54",
-    "storage_bucket": "templatesapp-4dd54.firebasestorage.app"
+    "project_number": "109749738479",
+    "project_id": "brandbuilders-ed4e2",
+    "storage_bucket": "brandbuilders-ed4e2.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:209905167867:android:19a88487a0d2d9460e6f5e",
+        "mobilesdk_app_id": "1:109749738479:android:f9dafd7185ee4b924b341a",
         "android_client_info": {
-          "package_name": "com.example.photomerge"
+          "package_name": "com.techfifo.photomerge"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC37KTYAiNqZZvHdJxYcn0zLNxgpghpm_8"
+          "current_key": "AIzaSyDLHbCmaJJqRWp4xlz0oA4xncsXb4cm05M"
         }
       ],
       "services": {

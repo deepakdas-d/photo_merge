@@ -25,7 +25,7 @@ class SupportPage extends StatelessWidget {
               Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => UserDashboardContent(),
+                    builder: (context) => UserDashboard(),
                   ));
             },
             icon: Icon(
@@ -50,11 +50,11 @@ class SupportPage extends StatelessWidget {
             SizedBox(height: 16),
             ListTile(
               leading: Icon(Icons.email),
-              title: Text('Email: support@example.com'),
+              title: Text('Email: Creativeacademy5265@gmail.com'),
             ),
             ListTile(
               leading: Icon(Icons.phone),
-              title: Text('Phone: +1 (123) 456-7890'),
+              title: Text('Phone: +91 8075691175'),
             ),
             ListTile(
               leading: Icon(Icons.web),

@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.photomerge"
+    namespace = "com.techfifo.photomerge"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -22,7 +22,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.photomerge"
+        applicationId = "com.techfifo.photomerge"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 23
@@ -31,13 +31,23 @@ android {
         versionName = flutter.versionName
     }
 
-    buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+    signingConfigs {
+        create("release") {
+            storeFile = file("C:/Users/hp/.android/my-release-key.keystore") // Adjust if you placed it elsewhere
+            storePassword = "fahad@8826"
+            keyAlias = "my-key-alias"
+            keyPassword = "fahad@8826"
         }
     }
+
+    buildTypes {
+    release {
+        signingConfig = signingConfigs.release
+        minifyEnabled false
+        shrinkResources false
+        proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+    }
+}
 }
 
 flutter {

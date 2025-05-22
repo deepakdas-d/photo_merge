@@ -119,9 +119,9 @@ class _UserSubscriptionPageState extends State<UserSubscriptionPage> {
 
   Future<void> _redirectToWhatsApp(
       String plan, int price, String duration) async {
-    const adminWhatsAppNumber = '+919567725398';
+    const adminWhatsAppNumber = '+918075601175';
     final message =
-        'Hello, I want to ${userData?['isSubscribed'] == true ? 'renew' : 'subscribe to'} the $plan (\₹$price/$duration) for the PhotoMerge app.';
+        'Hello, I want to ${userData?['isSubscribed'] == true ? 'renew' : 'subscribe to'} the $plan (\₹$price/$duration) for the BrandBuilder app.';
     final encodedMessage = Uri.encodeComponent(message);
 
     final whatsappUrl =
@@ -222,7 +222,7 @@ class _UserSubscriptionPageState extends State<UserSubscriptionPage> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => UserDashboardContent(),
+                  builder: (context) => UserDashboard(),
                 ));
           },
           icon: Icon(

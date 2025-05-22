@@ -75,6 +75,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
       'onTap': (BuildContext context) =>
           Navigator.pushNamed(context, '/vediourl')
     },
+    // {
+    //   'icon': Icons.new_label,
+    //   'title': 'Admin Home',
+    //   'subtitle': 'Create Admin.',
+    //   'onTap': (BuildContext context) =>
+    //       Navigator.pushNamed(context, '/createadmin')
+    // },
   ];
 
   List<Map<String, dynamic>> _filteredActions = [];
