@@ -59,18 +59,8 @@ class _ImageDetailViewState extends State<ImageDetailView>
     );
     _getUserData();
     _fetchDominantColor();
-    AwesomeNotifications().initialize(
-      null,
-      [
-        NotificationChannel(
-          channelKey: 'basic_channel',
-          channelName: 'Basic Notifications',
-          channelDescription: 'Notification channel for basic notifications',
-          defaultColor: const Color(0xFF4CAF50),
-          ledColor: Colors.white,
-        ),
-      ],
-    );
+
+    _initializeNotifications();
   }
 
   @override
@@ -78,6 +68,25 @@ class _ImageDetailViewState extends State<ImageDetailView>
     _animationController.dispose();
     _dominantColors.clear();
     super.dispose();
+  }
+
+  Future<void> _initializeNotifications() async {
+    try {
+      await AwesomeNotifications().initialize(
+        null,
+        [
+          NotificationChannel(
+            channelKey: 'basic_channel',
+            channelName: 'Basic Notifications',
+            channelDescription: 'Notification channel for basic notifications',
+            defaultColor: const Color(0xFF4CAF50),
+            ledColor: Colors.white,
+          ),
+        ],
+      );
+    } catch (e) {
+      print('Error initializing notifications: $e');
+    }
   }
 
   Future<void> _getUserData() async {
@@ -473,7 +482,12 @@ class _ImageDetailViewState extends State<ImageDetailView>
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      userData!['firstName'] ?? 'Unknown User',
+                                      '${userData!['firstName'] ?? ''} ${userData!['lastName'] ?? ''}'
+                                              .trim()
+                                              .isNotEmpty
+                                          ? '${userData!['firstName'] ?? ''} ${userData!['lastName'] ?? ''}'
+                                              .trim()
+                                          : 'Unknown User',
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 13, // Reduced from 14
@@ -486,8 +500,6 @@ class _ImageDetailViewState extends State<ImageDetailView>
                                           ),
                                         ],
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
                                     ),
                                     Text(
                                       userData!['designation'] ??
@@ -910,12 +922,8 @@ class _ImageDetailViewState extends State<ImageDetailView>
           if (snapshot.connectionState == ConnectionState.waiting) {
             // Show loader while waiting
             return Center(
-              child: Lottie.asset(
-                'assets/animations/image_generating.json',
-                width: 200,
-                height: 200,
-                fit: BoxFit.contain,
-              ),
+              child: Lottie.asset('assets/animations/image_generating.json',
+                  width: 200, height: 200, fit: BoxFit.contain, repeat: true),
             );
           } else {
             // Show the photo card content after delay
@@ -942,16 +950,40 @@ class WatermarkPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final textPainter = TextPainter(
       text: TextSpan(
-        text: userData?['companyName'] != null
-            ? '${userData!['companyName']} '
-            : 'BrandBuilders',
         style: const TextStyle(
-            color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold),
+          color: Colors.white54,
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+        ),
+        children: [
+          TextSpan(
+            text: userData != null &&
+                    '${userData!['firstName'] ?? ''} ${userData!['lastName'] ?? ''}'
+                        .trim()
+                        .isNotEmpty
+                ? '${userData!['firstName'] ?? ''} ${userData!['lastName'] ?? ''}'
+                    .trim()
+                : 'Unknown User',
+          ),
+          const TextSpan(text: ' | '),
+          TextSpan(
+            text: userData?['phone'] ?? '',
+          ),
+        ],
       ),
       textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
     );
+
     textPainter.layout();
-    textPainter.paint(canvas, const Offset(8, 8));
+
+    // Calculate offset to center the text horizontally
+    final offset = Offset(
+      (size.width - textPainter.width) / 2, // horizontal center
+      8, // vertical offset from top
+    );
+
+    textPainter.paint(canvas, offset);
   }
 
   @override

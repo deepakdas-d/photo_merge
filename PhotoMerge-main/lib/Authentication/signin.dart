@@ -190,18 +190,28 @@ class _LoginPageState extends State<LoginPage> {
             context, destination, (route) => false);
       }
     } on FirebaseAuthException catch (e) {
+      print('FirebaseAuthException code: ${e.code}');
       String errorMessage = 'An error occurred during sign in';
 
-      if (e.code == 'user-not-found') {
-        errorMessage = 'No user found with this email';
-      } else if (e.code == 'wrong-password') {
-        errorMessage = 'Incorrect password';
-      } else if (e.code == 'invalid-email') {
-        errorMessage = 'Invalid email address';
-      } else if (e.code == 'user-disabled') {
-        errorMessage = 'This account has been disabled';
-      } else if (e.code == 'too-many-requests') {
-        errorMessage = 'Too many failed login attempts. Try again later';
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = 'No user found with this email';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Incorrect password';
+          break;
+        case 'invalid-email':
+          errorMessage = 'Invalid email address';
+          break;
+        case 'too-many-requests':
+          errorMessage = 'Too many failed login attempts. Try again later';
+          break;
+        case 'invalid-credential':
+          errorMessage =
+              'Invalid credentials. Please check your email and password.';
+          break;
+        default:
+          errorMessage = 'Authentication failed. (${e.code})';
       }
 
       setState(() {
