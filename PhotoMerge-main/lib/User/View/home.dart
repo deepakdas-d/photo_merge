@@ -23,18 +23,28 @@ class UserDashboard extends StatefulWidget {
 
 class _UserDashboardState extends State<UserDashboard> {
   final ScrollController _scrollController = ScrollController();
+  //firebase
+  final userId = FirebaseAuth.instance.currentUser?.uid;
+  bool _isLoading = true;
+  final _firebaseAuth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
+//color
+  static const Color errorColor = Color(0xFFE53E3E);
+  static const Color successColor = Color(0xFF38A169);
 
+  //userimage
+  String? _userImageUrl;
   @override
   void initState() {
     super.initState();
 
-    final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<UserDataProvider>().fetchUserData(userId);
         context.read<CarouselProvider>().fetchCarouselImages();
         context.read<CategoriesProvider>().fetchCategories();
         context.read<RecentImagesProvider>().fetchRecentImages();
+        _loadUserProfileImage();
       });
     }
 
@@ -50,6 +60,53 @@ class _UserDashboardState extends State<UserDashboard> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadUserProfileImage() async {
+    setState(() => _isLoading = true);
+
+    final currentUser = _firebaseAuth.currentUser;
+    if (currentUser == null) {
+      setState(() => _isLoading = false);
+      _showSnackBar('No user signed in', isError: true);
+      return;
+    }
+
+    try {
+      final profileDoc = await _firestore
+          .collection('user_profile')
+          .doc(currentUser.uid)
+          .get();
+
+      if (profileDoc.exists && mounted) {
+        final profileData = profileDoc.data()!;
+        print('Fetched user image URL: ${profileData['userImage']}');
+        setState(() {
+          _userImageUrl = profileData['userImage']; // store the image URL
+        });
+      }
+    } catch (e) {
+      _showSnackBar('Error loading profile picture: $e', isError: true);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: GoogleFonts.poppins(
+              color: Colors.white, fontWeight: FontWeight.w500),
+        ),
+        backgroundColor: isError ? errorColor : successColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        margin: const EdgeInsets.all(8),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   // Modern UI theme colors - matching original page
@@ -772,17 +829,11 @@ class _UserDashboardState extends State<UserDashboard> {
                     children: [
                       CircleAvatar(
                         radius: 30,
-                        backgroundColor: Colors.white,
-                        child: Text(
-                          provider.userData?['firstName']?.isNotEmpty == true
-                              ? provider.userData!['firstName'][0].toUpperCase()
-                              : 'U',
-                          style: const TextStyle(
-                            color: primaryColor,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        backgroundColor: Colors.transparent,
+                        backgroundImage:
+                            _userImageUrl != null && _userImageUrl!.isNotEmpty
+                                ? NetworkImage(_userImageUrl!)
+                                : null,
                       ),
                       const SizedBox(height: 8),
                       Text(

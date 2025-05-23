@@ -237,75 +237,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  // Future<void> _updateUserData() async {
-  //   if (!_formKey.currentState!.validate()) return;
-
-  //   final currentUser = _firebaseAuth.currentUser;
-  //   if (currentUser == null) {
-  //     _showSnackBar('No user signed in', isError: true);
-  //     return;
-  //   }
-
-  //   setState(() => _isSaving = true);
-  //   try {
-  //     _userImageUrl = await _uploadImage(_userImage, _userImageUrl);
-  //     _companyLogoUrl = await _uploadImage(_companyLogo, _companyLogoUrl);
-
-  //     final data = {
-  //       'firstName': _firstNameController.text.trim(),
-  //       'lastName': _firstNameController.text.trim(),
-  //       'email': _emailController.text.trim(),
-  //       'phone': _phoneController.text.trim(),
-  //       'companyName': _companyNameController.text.trim(),
-  //       'designation': _designationController.text.trim(),
-  //       'companyWebsite': _websiteController.text.trim(),
-  //       'district': _districtController.text.trim(),
-  //       'branch': _branchController.text.trim(),
-  //       'userImage': _userImageUrl ?? '',
-  //       'companyLogo': _companyLogoUrl ?? '',
-  //       'updatedAt': FieldValue.serverTimestamp(),
-  //     };
-
-  //     // Check if all required fields are non-empty
-  //     bool isProfileComplete = _firstNameController.text.trim().isNotEmpty &&
-  //         _lastNameController.text.trim().isNotEmpty &&
-  //         _emailController.text.trim().isNotEmpty &&
-  //         _phoneController.text.trim().isNotEmpty &&
-  //         _companyNameController.text.trim().isNotEmpty &&
-  //         _designationController.text.trim().isNotEmpty &&
-  //         _districtController.text.trim().isNotEmpty &&
-  //         _branchController.text.trim().isNotEmpty &&
-  //         (_userImageUrl?.isNotEmpty ?? false) &&
-  //         (_companyLogoUrl?.isNotEmpty ?? false);
-
-  //     // Update user_profile collection
-  //     await _firestore
-  //         .collection('user_profile')
-  //         .doc(currentUser.uid)
-  //         .set(data, SetOptions(merge: true));
-
-  //     // Update users collection with profile_status
-  //     await _firestore.collection('users').doc(currentUser.uid).set({
-  //       'email': _emailController.text.trim(),
-  //       'phone': _phoneController.text.trim(),
-  //       'isActive': true,
-  //       'role': 'user',
-  //       'profile_status': isProfileComplete, // Update profile_status
-  //     }, SetOptions(merge: true));
-
-  //     if (mounted) {
-  //       _showSnackBar('Profile updated successfully');
-  //       Navigator.pushReplacement(
-  //           context, MaterialPageRoute(builder: (context) => UserDashboard()));
-  //     }
-  //   } catch (e) {
-  //     if (mounted) {
-  //       _showSnackBar('Error updating profile: $e', isError: true);
-  //     }
-  //   } finally {
-  //     if (mounted) setState(() => _isSaving = false);
-  //   }
-  // }
   Future<String> _getDeviceId() async {
     try {
       DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
@@ -354,8 +285,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
       final profileData = {
         'firstName': _firstNameController.text.trim(),
-        'lastName':
-            _lastNameController.text.trim(), // Fixed: Use _lastNameController
+        'lastName': _lastNameController.text.trim(),
         'email': _emailController.text.trim(),
         'phone': _phoneController.text.trim(),
         'companyName': _companyNameController.text.trim(),
@@ -377,8 +307,7 @@ class _ProfilePageState extends State<ProfilePage> {
           _designationController.text.trim().isNotEmpty &&
           _districtController.text.trim().isNotEmpty &&
           _branchController.text.trim().isNotEmpty &&
-          (_userImageUrl?.isNotEmpty ?? false) &&
-          (_companyLogoUrl?.isNotEmpty ?? false);
+          (_userImageUrl?.isNotEmpty ?? false);
 
       // Update user_profile collection
       await _firestore
@@ -551,17 +480,43 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         child: Column(
           children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: dividerColor,
-              backgroundImage: _userImage != null
-                  ? FileImage(_userImage!)
-                  : _userImageUrl?.isNotEmpty ?? false
-                      ? NetworkImage(_userImageUrl!)
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 50,
+                  backgroundColor: dividerColor,
+                  backgroundImage: _userImage != null
+                      ? FileImage(_userImage!)
+                      : _userImageUrl?.isNotEmpty ?? false
+                          ? NetworkImage(_userImageUrl!)
+                          : null,
+                  child: _userImage == null && (_userImageUrl?.isEmpty ?? true)
+                      ? Icon(Icons.person, size: 50, color: textSecondaryColor)
                       : null,
-              child: _userImage == null && (_userImageUrl?.isEmpty ?? true)
-                  ? Icon(Icons.person, size: 50, color: textSecondaryColor)
-                  : null,
+                ),
+                if (_userImage != null || (_userImageUrl?.isNotEmpty ?? false))
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _userImage = null;
+                          _userImageUrl = null;
+                        });
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.6),
+                          shape: BoxShape.circle,
+                        ),
+                        padding: const EdgeInsets.all(4),
+                        child: const Icon(Icons.close,
+                            size: 16, color: Colors.white),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 8),
             Text(
@@ -587,19 +542,46 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         child: Column(
           children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: dividerColor),
-              ),
-              child: _companyLogo != null
-                  ? Image.file(_companyLogo!, fit: BoxFit.cover)
-                  : _companyLogoUrl?.isNotEmpty ?? false
-                      ? Image.network(_companyLogoUrl!, fit: BoxFit.cover)
-                      : Icon(Icons.business,
-                          size: 40, color: textSecondaryColor),
+            Stack(
+              children: [
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: dividerColor),
+                  ),
+                  child: _companyLogo != null
+                      ? Image.file(_companyLogo!, fit: BoxFit.cover)
+                      : _companyLogoUrl?.isNotEmpty ?? false
+                          ? Image.network(_companyLogoUrl!, fit: BoxFit.cover)
+                          : Icon(Icons.business,
+                              size: 40, color: textSecondaryColor),
+                ),
+                if (_companyLogo != null ||
+                    (_companyLogoUrl?.isNotEmpty ?? false))
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _companyLogo = null;
+                          _companyLogoUrl = null;
+                        });
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.6),
+                          shape: BoxShape.circle,
+                        ),
+                        padding: const EdgeInsets.all(4),
+                        child: const Icon(Icons.close,
+                            color: Colors.white, size: 16),
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 8),
             Text(

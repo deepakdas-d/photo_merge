@@ -38,13 +38,7 @@ class _AllVideosPageState extends State<AllVideosPage> {
   final double _cardBorderRadius = 12.0;
 
   // Categories matching AddVediourl
-  final List<String> _categories = [
-    'All',
-    'Tutorial',
-    'Entertainment',
-    'Vlog',
-    'Other',
-  ];
+  final List<String> _categories = ['All', 'Training', 'Other'];
 
   @override
   void dispose() {

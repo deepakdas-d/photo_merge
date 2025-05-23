@@ -20,11 +20,7 @@ class _AddVediourlState extends State<AddVediourl> {
 
   // List of categories for the dropdown
   final List<String> _categories = [
-    'Tutorial',
-    'Entertainment',
-    'Vlog',
-    'Gaming',
-    'Music',
+    'Training',
     'Other',
   ];
 

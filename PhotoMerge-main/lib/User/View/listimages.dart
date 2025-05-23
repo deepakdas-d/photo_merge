@@ -169,7 +169,7 @@ class _ListImagesState extends State<ListImages> {
                               );
                             },
                             transitionDuration:
-                                const Duration(milliseconds: 300),
+                                const Duration(milliseconds: 30),
                           ),
                         );
                       });

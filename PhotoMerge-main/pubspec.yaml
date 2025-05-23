@@ -51,7 +51,7 @@ dependencies:
   audio_service: ^0.18.18
   audio_session: ^0.2.2
   youtube_player_iframe: ^5.2.1
-
+  
 
 
 
@@ -87,6 +87,7 @@ flutter:
   - assets/animations/image_generating.json
   - assets/images/
   - assets/logo/BBnew.png
+  - assets/animations/loading.json
 
     
 
