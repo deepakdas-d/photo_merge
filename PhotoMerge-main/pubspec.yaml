@@ -51,6 +51,7 @@ dependencies:
   audio_service: ^0.18.18
   audio_session: ^0.2.2
   youtube_player_iframe: ^5.2.1
+  no_screenshot: ^0.3.1
   
 
 
@@ -63,7 +64,7 @@ dev_dependencies:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/logo/BBnew.png"
+  image_path: "assets/logo/bb-logo.png"
 
 
 flutter_lints: ^5.0.0
@@ -88,6 +89,7 @@ flutter:
   - assets/images/
   - assets/logo/BBnew.png
   - assets/animations/loading.json
+  - assets/logo/bb-logo.png
 
     
 

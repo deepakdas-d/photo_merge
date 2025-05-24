@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:no_screenshot/no_screenshot.dart';
 import 'package:photomerge/main.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
@@ -736,8 +737,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   void initState() {
     super.initState();
-    debugPrint(
-        'VideoPlayerScreen: initState - videoId=${widget.videoId}, title=${widget.title}');
+    NoScreenshot.instance.screenshotOff();
     _controller = YoutubePlayerController(
       initialVideoId: widget.videoId,
       flags: const YoutubePlayerFlags(
@@ -911,7 +911,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 
   @override
   void dispose() {
-    debugPrint('VideoPlayerScreen: dispose');
+    NoScreenshot.instance.screenshotOn();
     _controller.removeListener(_onPlayerValueChange);
     _controller.dispose();
     _audioHandler?.stop();
