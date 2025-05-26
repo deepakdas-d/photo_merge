@@ -286,7 +286,6 @@ class ImageDetailViewModel extends ChangeNotifier {
 
           await Share.shareXFiles(
             [XFile(tempFile.path)],
-            text: 'Check out this image from PhotoMerge!',
           );
 
           await tempFile.delete();

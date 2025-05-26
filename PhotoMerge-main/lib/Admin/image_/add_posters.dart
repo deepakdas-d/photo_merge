@@ -55,7 +55,10 @@ class _AddImagePageState extends State<AddImagePage> {
       // Resize the image to 941x1280 pixels
       final resizedImage =
           // img.copyResize(originalImage, width: 941, height: 1280);
-          img.copyResize(originalImage, width: 2480, height: 2650);
+          img.copyResize(
+        originalImage,
+        width: 2480,
+      );
 
       // Save the resized image
       final tempDir = await getTemporaryDirectory();

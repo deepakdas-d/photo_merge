@@ -54,9 +54,8 @@ class _ImageDetailViewState extends State<ImageDetailView> {
           automaticallyImplyLeading: false,
           leading: IconButton(
             onPressed: () {
-              Navigator.pushReplacement(
+              Navigator.pop(
                 context,
-                MaterialPageRoute(builder: (context) => const ListImages()),
               );
             },
             icon: const Icon(Icons.arrow_back, color: Color(0xFF00A19A)),

@@ -849,65 +849,92 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     setState(() {});
   }
 
-  void _changeQuality(String quality) {
-    final currentPosition = _controller.value.position;
-    _controller.dispose();
-    _controller = YoutubePlayerController(
-      initialVideoId: widget.videoId,
-      flags: YoutubePlayerFlags(
-        autoPlay: true,
-        mute: false,
-        enableCaption: true,
-        forceHD: quality == '720p',
-      ),
-    );
-    _controller.addListener(_onPlayerValueChange);
-    _controller.seekTo(currentPosition);
-    setState(() {
-      _currentQuality = quality;
+  void _syncPlaybackWithAudioHandler() {
+    _audioHandler?.playbackState.listen((state) {
+      if (state.playing && !_controller.value.isPlaying) {
+        _controller.play();
+      } else if (!state.playing && _controller.value.isPlaying) {
+        _controller.pause();
+      }
     });
-    Navigator.pop(context);
   }
 
-  void _showQualitySelector() {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text(
-                  'Select Quality',
-                  style: GoogleFonts.poppins(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const Divider(height: 1),
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: _availableQualities.length,
-                itemBuilder: (context, index) {
-                  final quality = _availableQualities[index];
-                  return ListTile(
-                    title: Text(quality),
-                    trailing: _currentQuality == quality
-                        ? const Icon(Icons.check, color: Color(0xFF4CAF50))
-                        : null,
-                    onTap: () => _changeQuality(quality),
-                  );
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
+  // Future<void> _changeQuality(String quality) async {
+  //   final currentPosition = _controller.value.position;
+  //   final wasPlaying = _controller.value.isPlaying;
+
+  //   // Explicitly pause before disposing
+  //   _controller.pause();
+  //   await _audioHandler?.pause();
+
+  //   // Short delay to allow pause to take effect
+  //   await Future.delayed(const Duration(milliseconds: 300));
+
+  //   _controller.removeListener(_onPlayerValueChange);
+  //   _controller.dispose();
+
+  //   // Create new controller
+  //   _controller = YoutubePlayerController(
+  //     initialVideoId: widget.videoId,
+  //     flags: YoutubePlayerFlags(
+  //       autoPlay: wasPlaying, // Resume only if was playing
+  //       mute: false,
+  //       enableCaption: true,
+  //       forceHD: quality == '720p',
+  //     ),
+  //   );
+
+  //   _controller.addListener(_onPlayerValueChange);
+  //   _controller.seekTo(currentPosition);
+
+  //   _syncPlaybackWithAudioHandler();
+
+  //   setState(() {
+  //     _currentQuality = quality;
+  //   });
+
+  //   Navigator.pop(context);
+  // }
+
+  // void _showQualitySelector() {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     builder: (context) {
+  //       return SafeArea(
+  //         child: Column(
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             Padding(
+  //               padding: const EdgeInsets.all(16.0),
+  //               child: Text(
+  //                 'Select Quality',
+  //                 style: GoogleFonts.poppins(
+  //                   fontSize: 18,
+  //                   fontWeight: FontWeight.bold,
+  //                 ),
+  //               ),
+  //             ),
+  //             const Divider(height: 1),
+  //             ListView.builder(
+  //               shrinkWrap: true,
+  //               itemCount: _availableQualities.length,
+  //               itemBuilder: (context, index) {
+  //                 final quality = _availableQualities[index];
+  //                 return ListTile(
+  //                   title: Text(quality),
+  //                   trailing: _currentQuality == quality
+  //                       ? const Icon(Icons.check, color: Color(0xFF4CAF50))
+  //                       : null,
+  //                   onTap: () => _changeQuality(quality),
+  //                 );
+  //               },
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   @override
   void dispose() {
@@ -972,10 +999,10 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
               onPressed: _skipForward,
               icon: const Icon(Icons.forward_10, color: Colors.white),
             ),
-            IconButton(
-              icon: const Icon(Icons.settings, color: Colors.white),
-              onPressed: _showQualitySelector,
-            ),
+            // IconButton(
+            //   icon: const Icon(Icons.settings, color: Colors.white),
+            //   onPressed: _showQualitySelector,
+            // ),
             FullScreenButton(),
           ],
         ),
