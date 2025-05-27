@@ -158,7 +158,7 @@ class _UserDashboardState extends State<UserDashboard> {
           ),
           iconTheme: IconThemeData(color: primaryColor),
         ),
-        cardTheme: CardTheme(
+       cardTheme: CardThemeData(
           color: cardColor,
           elevation: 2,
           shape: RoundedRectangleBorder(

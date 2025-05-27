@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:no_screenshot/no_screenshot.dart';
-import 'package:photomerge/User/View/listimages.dart';
 import 'package:photomerge/User/View/provider/image_details_provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:provider/provider.dart';
@@ -64,15 +63,20 @@ class _ImageDetailViewState extends State<ImageDetailView> {
         body: Consumer<ImageDetailViewModel>(
           builder: (context, viewModel, child) {
             if (viewModel.isLoading) {
-              return const Center(
+              return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
+                
+                    const SizedBox(height: 16),
                     Text(
-                      'Loading, please wait...',
-                      style: TextStyle(fontSize: 16),
+                      'Loading...',
+                      style: GoogleFonts.poppins(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600, // or FontWeight.bold
+                        color: const Color(0xFF64748B),
+                        letterSpacing: 1.0,
+                      ),
                     ),
                   ],
                 ),
