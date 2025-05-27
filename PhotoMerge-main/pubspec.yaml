@@ -66,6 +66,7 @@ flutter_icons:
   android: true
   ios: true
   image_path: "assets/logo/bb-logo.png"
+  
 
 
 flutter_lints: ^5.0.0
