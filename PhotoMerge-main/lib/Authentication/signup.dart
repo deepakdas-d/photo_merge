@@ -827,7 +827,7 @@ class _SignupPageState extends State<SignupPage> {
     try {
       var headers = {'Content-Type': 'application/json'};
       var request =
-          http.Request('POST', Uri.parse('http://192.168.20.8:8000/send-otp/'));
+          http.Request('POST', Uri.parse('https://deepakdas.pythonanywhere.com/send-otp/'));
       request.body = json.encode({"email": email});
       request.headers.addAll(headers);
 
@@ -852,7 +852,7 @@ class _SignupPageState extends State<SignupPage> {
     try {
       var headers = {'Content-Type': 'application/json'};
       var request = http.Request(
-          'POST', Uri.parse('http://192.168.20.8:8000/verify-otp/'));
+          'POST', Uri.parse('https://deepakdas.pythonanywhere.com/verify-otp/'));
       request.body = json.encode({"email": email, "otp": otp});
       request.headers.addAll(headers);
 
