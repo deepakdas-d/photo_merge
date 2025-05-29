@@ -20,11 +20,17 @@ class ImageDetailViewModel extends ChangeNotifier {
   Color _backgroundColor = Colors.grey.shade800;
   final Map<String, Color> _dominantColors = {};
   bool _isLoading = true;
+  bool isLoadingforbutton = false;
   String? _error;
 
   Color get backgroundColor => _backgroundColor;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  void setLoadingforbutton(bool value) {
+    isLoadingforbutton = value;
+    notifyListeners();
+  }
 
   ImageDetailViewModel(String photoUrl) {
     _initialize(photoUrl);
@@ -106,43 +112,62 @@ class ImageDetailViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> captureAndSaveImage(String photoId, String photoUrl,
-      GlobalKey cardKey, BuildContext context) async {
+  Future<void> captureAndSaveImage(
+    String photoId,
+    String photoUrl,
+    GlobalKey cardKey,
+    BuildContext context, {
+    required VoidCallback onStart,
+    required VoidCallback onComplete,
+  }) async {
+    onStart(); // Start loading spinner
+
     bool hasPermission = true;
-    if (Platform.isAndroid) {
-      final deviceInfo = DeviceInfoPlugin();
-      final androidInfo = await deviceInfo.androidInfo;
-      final sdkInt = androidInfo.version.sdkInt;
-
-      if (sdkInt < 33) {
-        final status = await Permission.storage.request();
-        hasPermission = status.isGranted;
-        if (!hasPermission && status.isPermanentlyDenied) {
-          _showPermissionDeniedSnackBar(context, 'Storage');
-          return;
-        } else if (!hasPermission) {
-          _showSnackBar(context, 'Storage permission denied');
-          return;
-        }
-      } else {
-        final status = await Permission.photos.request();
-        hasPermission = status.isGranted;
-        if (!hasPermission && status.isPermanentlyDenied) {
-          _showPermissionDeniedSnackBar(context, 'Photo access');
-          return;
-        } else if (!hasPermission) {
-          _showSnackBar(context, 'Photo access permission denied');
-          return;
-        }
-      }
-    }
-
-    if (!hasPermission) return;
 
     try {
+      // Request permission if on Android
+      if (Platform.isAndroid) {
+        final deviceInfo = DeviceInfoPlugin();
+        final androidInfo = await deviceInfo.androidInfo;
+        final sdkInt = androidInfo.version.sdkInt;
+
+        if (sdkInt < 33) {
+          final status = await Permission.storage.request();
+          hasPermission = status.isGranted;
+          if (!hasPermission && status.isPermanentlyDenied) {
+            _showPermissionDeniedSnackBar(context, 'Storage');
+            onComplete();
+            return;
+          } else if (!hasPermission) {
+            _showSnackBar(context, 'Storage permission denied');
+            onComplete();
+            return;
+          }
+        } else {
+          final status = await Permission.photos.request();
+          hasPermission = status.isGranted;
+          if (!hasPermission && status.isPermanentlyDenied) {
+            _showPermissionDeniedSnackBar(context, 'Photo access');
+            onComplete();
+            return;
+          } else if (!hasPermission) {
+            _showSnackBar(context, 'Photo access permission denied');
+            onComplete();
+            return;
+          }
+        }
+      }
+
+      if (!hasPermission) {
+        onComplete();
+        return;
+      }
+
+      // Fetch user data
       final userDoc = await _firestore.collection('users').doc(userId).get();
       if (!userDoc.exists) {
         _showSnackBar(context, 'User data not found');
+        onComplete();
         return;
       }
 
@@ -161,68 +186,65 @@ class ImageDetailViewModel extends ChangeNotifier {
       }
 
       if (isSubscribed && subscriptionExpiry == null) {
-        _showSnackBar(context,
-            'Subscription data is incomplete. Please contact support.');
+        _showSnackBar(
+          context,
+          'Subscription data is incomplete. Please contact support.',
+        );
+        onComplete();
         return;
       }
 
-      // Allow download only if user has an active subscription or hasn't used their one-time free download
+      // Allow download if subscribed or free download is available
       if (hasActiveSubscription || !freeDownloadUsed) {
-        try {
-          _showSnackBar(context, 'Processing image...');
+        _showSnackBar(context, 'Processing image...');
 
-          final boundary = cardKey.currentContext?.findRenderObject()
-              as RenderRepaintBoundary?;
-          if (boundary == null) {
-            _showSnackBar(context, 'Cannot capture image at this time');
-            return;
-          }
+        final boundary = cardKey.currentContext?.findRenderObject()
+            as RenderRepaintBoundary?;
+        if (boundary == null) {
+          _showSnackBar(context, 'Cannot capture image at this time');
+          onComplete();
+          return;
+        }
 
-          const double pixelRatio = 5.0;
-          const double a4Width = 3540.0;
-          const double a4Height = 5424.0;
+        const double pixelRatio = 5.0;
+        const double a4Width = 3540.0;
+        const double a4Height = 5424.0;
 
-          final image = await boundary.toImage(pixelRatio: pixelRatio);
-          final byteData =
-              await image.toByteData(format: ui.ImageByteFormat.png);
-          if (byteData == null) throw Exception('Failed to capture image data');
+        final image = await boundary.toImage(pixelRatio: pixelRatio);
+        final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+        if (byteData == null) throw Exception('Failed to capture image data');
 
-          final codec =
-              await ui.instantiateImageCodec(byteData.buffer.asUint8List());
-          final frameInfo = await codec.getNextFrame();
+        final codec =
+            await ui.instantiateImageCodec(byteData.buffer.asUint8List());
+        final frameInfo = await codec.getNextFrame();
 
-          final recorder = ui.PictureRecorder();
-          final canvas = Canvas(recorder);
+        final recorder = ui.PictureRecorder();
+        final canvas = Canvas(recorder);
 
-          canvas.drawImageRect(
-            frameInfo.image,
-            Rect.fromLTWH(
-                0, 0, image.width.toDouble(), image.height.toDouble()),
-            Rect.fromLTWH(0, 0, a4Width, a4Height),
-            Paint()..filterQuality = FilterQuality.high,
-          );
+        canvas.drawImageRect(
+          frameInfo.image,
+          Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+          Rect.fromLTWH(0, 0, a4Width, a4Height),
+          Paint()..filterQuality = FilterQuality.high,
+        );
 
-          final picture = recorder.endRecording();
-          final a4Image =
-              await picture.toImage(a4Width.toInt(), a4Height.toInt());
-          final a4ByteData =
-              await a4Image.toByteData(format: ui.ImageByteFormat.png);
-          final a4PngBytes = a4ByteData!.buffer.asUint8List();
+        final picture = recorder.endRecording();
+        final a4Image =
+            await picture.toImage(a4Width.toInt(), a4Height.toInt());
+        final a4ByteData =
+            await a4Image.toByteData(format: ui.ImageByteFormat.png);
+        final a4PngBytes = a4ByteData!.buffer.asUint8List();
 
-          await FlutterImageGallerySaver.saveImage(a4PngBytes);
+        await FlutterImageGallerySaver.saveImage(a4PngBytes);
 
-          _showSnackBar(context, 'Image saved to gallery!', floating: true);
+        _showSnackBar(context, 'Image saved to gallery!', floating: true);
 
-          // Update freeDownloadUsed only if this was a free download (no active subscription)
-          if (!hasActiveSubscription) {
-            await _firestore.collection('users').doc(userId).update({
-              'freeDownloadUsed': true,
-              'lastSubscriptionUpdate': Timestamp.now(),
-            });
-          }
-        } catch (e) {
-          print('Error saving image: $e');
-          _showSnackBar(context, 'Error saving image: $e');
+        // Mark free download as used if not subscribed
+        if (!hasActiveSubscription) {
+          await _firestore.collection('users').doc(userId).update({
+            'freeDownloadUsed': true,
+            'lastSubscriptionUpdate': Timestamp.now(),
+          });
         }
       } else {
         _showSnackBar(context,
@@ -230,8 +252,10 @@ class ImageDetailViewModel extends ChangeNotifier {
         _showSubscriptionDialog(context);
       }
     } catch (e) {
-      print('Error checking user subscription: $e');
+      print('Error during capture: $e');
       _showSnackBar(context, 'Error: $e');
+    } finally {
+      onComplete(); // Always stop the loader
     }
   }
 

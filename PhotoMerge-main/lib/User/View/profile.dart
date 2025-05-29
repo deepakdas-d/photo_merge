@@ -303,10 +303,6 @@ class _ProfilePageState extends State<ProfilePage> {
           _lastNameController.text.trim().isNotEmpty &&
           _emailController.text.trim().isNotEmpty &&
           _phoneController.text.trim().isNotEmpty &&
-          _companyNameController.text.trim().isNotEmpty &&
-          _designationController.text.trim().isNotEmpty &&
-          _districtController.text.trim().isNotEmpty &&
-          _branchController.text.trim().isNotEmpty &&
           (_userImageUrl?.isNotEmpty ?? false);
 
       // Update user_profile collection
@@ -431,14 +427,13 @@ class _ProfilePageState extends State<ProfilePage> {
                         const SizedBox(height: 16),
                         _buildSectionTitle('Company Information'),
                         _buildCompanyLogoSection(),
-                        _buildTextField('Company Name', Icons.business,
+                        _buildcompanyname('Company Name', Icons.business,
                             _companyNameController),
-                        _buildTextField(
+                        _builddesignation(
                             'Designation', Icons.work, _designationController),
-                        _buildTextField('District', Icons.location_city,
+                        _builddistrict('District', Icons.location_city,
                             _districtController),
-                        _buildTextField(
-                            'Branch', Icons.store, _branchController),
+                        _buildbranch('Branch', Icons.store, _branchController),
                         _buildweb(
                           'Website',
                           Icons.link,
@@ -447,9 +442,55 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton(
-                          onPressed: _updateUserData,
+                          onPressed: () async {
+                            final shouldSave = await showDialog<bool>(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Confirm Save'),
+                                  content: const Text(
+                                      'Do you want to save your profile changes?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context)
+                                          .pop(false), // Cancel
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).pop(true), // OK
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+
+                            if (shouldSave == true) {
+                              await _updateUserData();
+
+                              // Optionally show a success message
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Success'),
+                                    content: const Text(
+                                        'Your profile has been updated.'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(),
+                                        child: const Text('OK'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+                          },
                           child: const Text('Save Profile'),
-                        ),
+                        )
                       ],
                     ),
                   ),
@@ -636,6 +677,142 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildweb(
+    String label,
+    IconData icon,
+    TextEditingController controller, {
+    TextInputType type = TextInputType.text,
+    String? prefix,
+    bool? overrideEnabled,
+  }) {
+    final isEnabled = overrideEnabled ?? _isEditing;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: type,
+        enabled: isEnabled,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixText: prefix,
+          prefixIcon:
+              Icon(icon, color: isEnabled ? primaryColor : textSecondaryColor),
+          suffixIcon: isEnabled && controller.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 20),
+                  onPressed: () => controller.clear(),
+                  color: textSecondaryColor,
+                )
+              : null,
+        ),
+        style: GoogleFonts.poppins(
+            fontSize: 14, color: isEnabled ? textColor : textSecondaryColor),
+      ),
+    );
+  }
+
+  Widget _buildcompanyname(
+    String label,
+    IconData icon,
+    TextEditingController controller, {
+    TextInputType type = TextInputType.text,
+    String? prefix,
+    bool? overrideEnabled,
+  }) {
+    final isEnabled = overrideEnabled ?? _isEditing;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: type,
+        enabled: isEnabled,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixText: prefix,
+          prefixIcon:
+              Icon(icon, color: isEnabled ? primaryColor : textSecondaryColor),
+          suffixIcon: isEnabled && controller.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 20),
+                  onPressed: () => controller.clear(),
+                  color: textSecondaryColor,
+                )
+              : null,
+        ),
+        style: GoogleFonts.poppins(
+            fontSize: 14, color: isEnabled ? textColor : textSecondaryColor),
+      ),
+    );
+  }
+
+  Widget _builddesignation(
+    String label,
+    IconData icon,
+    TextEditingController controller, {
+    TextInputType type = TextInputType.text,
+    String? prefix,
+    bool? overrideEnabled,
+  }) {
+    final isEnabled = overrideEnabled ?? _isEditing;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: type,
+        enabled: isEnabled,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixText: prefix,
+          prefixIcon:
+              Icon(icon, color: isEnabled ? primaryColor : textSecondaryColor),
+          suffixIcon: isEnabled && controller.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 20),
+                  onPressed: () => controller.clear(),
+                  color: textSecondaryColor,
+                )
+              : null,
+        ),
+        style: GoogleFonts.poppins(
+            fontSize: 14, color: isEnabled ? textColor : textSecondaryColor),
+      ),
+    );
+  }
+
+  Widget _builddistrict(
+    String label,
+    IconData icon,
+    TextEditingController controller, {
+    TextInputType type = TextInputType.text,
+    String? prefix,
+    bool? overrideEnabled,
+  }) {
+    final isEnabled = overrideEnabled ?? _isEditing;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: type,
+        enabled: isEnabled,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixText: prefix,
+          prefixIcon:
+              Icon(icon, color: isEnabled ? primaryColor : textSecondaryColor),
+          suffixIcon: isEnabled && controller.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, size: 20),
+                  onPressed: () => controller.clear(),
+                  color: textSecondaryColor,
+                )
+              : null,
+        ),
+        style: GoogleFonts.poppins(
+            fontSize: 14, color: isEnabled ? textColor : textSecondaryColor),
+      ),
+    );
+  }
+
+  Widget _buildbranch(
     String label,
     IconData icon,
     TextEditingController controller, {

@@ -36,65 +36,75 @@ class _ImageDetailViewState extends State<ImageDetailView> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => ImageDetailViewModel(widget.photoUrl),
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: Text(
-            'Image Details',
-            style: GoogleFonts.poppins(
-              color: const Color(0xFF00A19A),
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          automaticallyImplyLeading: false,
-          leading: IconButton(
-            onPressed: () {
-              Navigator.pop(
-                context,
-              );
+      child: Consumer<ImageDetailViewModel>(
+        builder: (context, viewModel, _) {
+          return WillPopScope(
+            onWillPop: () async {
+              if (viewModel.isLoadingforbutton) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please wait, download in progress...'),
+                  ),
+                );
+                return false;
+              }
+              return true;
             },
-            icon: const Icon(Icons.arrow_back, color: Color(0xFF00A19A)),
-          ),
-        ),
-        body: Consumer<ImageDetailViewModel>(
-          builder: (context, viewModel, child) {
-            if (viewModel.isLoading) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                
-                    const SizedBox(height: 16),
-                    Text(
-                      'Loading...',
-                      style: GoogleFonts.poppins(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600, // or FontWeight.bold
-                        color: const Color(0xFF64748B),
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ],
+            child: Scaffold(
+              appBar: AppBar(
+                backgroundColor: Colors.white,
+                title: Text(
+                  'Image Details',
+                  style: GoogleFonts.poppins(
+                    color: const Color(0xFF00A19A),
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              );
-            }
-
-            if (viewModel.error != null) {
-              return Center(child: Text('Error: ${viewModel.error}'));
-            }
-
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: _buildPhotoCard(context, viewModel),
+                automaticallyImplyLeading: false,
+                leading: viewModel.isLoadingforbutton
+                    ? const SizedBox.shrink() // hide the back button
+                    : IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: const Icon(Icons.arrow_back,
+                            color: Color(0xFF00A19A)),
+                      ),
               ),
-            );
-          },
-        ),
+              body: viewModel.isLoading
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 16),
+                          Text(
+                            'Loading...',
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF64748B),
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : viewModel.error != null
+                      ? Center(child: Text('Error: ${viewModel.error}'))
+                      : SingleChildScrollView(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: _buildPhotoCard(context, viewModel),
+                          ),
+                        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -310,27 +320,55 @@ class _ImageDetailViewState extends State<ImageDetailView> {
       child: Row(
         children: [
           Expanded(
-            child: TextButton.icon(
-              icon: const Icon(Icons.download, size: 18, color: Colors.white),
-              label: const Text(
-                'Download',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              style: TextButton.styleFrom(
-                backgroundColor: viewModel.backgroundColor,
-                minimumSize: const Size(double.infinity, 44),
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ),
-              onPressed: () => viewModel.captureAndSaveImage(
-                  widget.photoId, widget.photoUrl, cardKey, context),
-            ),
+            child: viewModel.isLoadingforbutton
+                ? Container(
+                    height: 44,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: viewModel.backgroundColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        strokeWidth: 2,
+                      ),
+                    ),
+                  )
+                : TextButton.icon(
+                    icon: const Icon(Icons.download,
+                        size: 18, color: Colors.white),
+                    label: const Text(
+                      'Download',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      backgroundColor: viewModel.backgroundColor,
+                      minimumSize: const Size(double.infinity, 44),
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onPressed: () async {
+                      viewModel.setLoadingforbutton(true);
+                      await viewModel.captureAndSaveImage(
+                        widget.photoId,
+                        widget.photoUrl,
+                        cardKey,
+                        context,
+                        onStart: () => viewModel.setLoadingforbutton(true),
+                        onComplete: () => viewModel.setLoadingforbutton(false),
+                      );
+                    },
+                  ),
           ),
           const SizedBox(width: 8),
           Expanded(
